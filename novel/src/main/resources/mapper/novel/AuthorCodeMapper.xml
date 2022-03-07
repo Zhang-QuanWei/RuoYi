@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.novel.mapper.AuthorCodeMapper">
+    
+    <resultMap type="AuthorCode" id="AuthorCodeResult">
+        <result property="id"    column="id"    />
+        <result property="createUserName"    column="create_user_name"    />
+        <result property="code"    column="code"    />
+        <result property="validityTime"    column="validity_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="isUse"    column="is_use"    />
+    </resultMap>
+
+    <sql id="selectAuthorCodeVo">
+        select id, create_user_name, code, validity_time, create_time, is_use from author_code
+    </sql>
+
+    <select id="selectAuthorCodeList" parameterType="AuthorCode" resultMap="AuthorCodeResult">
+        <include refid="selectAuthorCodeVo"/>
+        <where>  
+            <if test="createUserName != null  and createUserName != ''"> and create_user_name like concat('%', #{createUserName}, '%')</if>
+            <if test="params.beginValidityTime != null and params.beginValidityTime != '' and params.endValidityTime != null and params.endValidityTime != ''"> and validity_time between #{params.beginValidityTime} and #{params.endValidityTime}</if>
+            <if test="isUse != null "> and is_use = #{isUse}</if>
+        </where>
+    </select>
+    
+    <select id="selectAuthorCodeById" parameterType="Long" resultMap="AuthorCodeResult">
+        <include refid="selectAuthorCodeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertAuthorCode" parameterType="AuthorCode" useGeneratedKeys="true" keyProperty="id">
+        insert into author_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="createUserName != null">create_user_name,</if>
+            <if test="code != null">code,</if>
+            <if test="validityTime != null">validity_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="isUse != null">is_use,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="createUserName != null">#{createUserName},</if>
+            <if test="code != null">#{code},</if>
+            <if test="validityTime != null">#{validityTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="isUse != null">#{isUse},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAuthorCode" parameterType="AuthorCode">
+        update author_code
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="createUserName != null">create_user_name = #{createUserName},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="validityTime != null">validity_time = #{validityTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="isUse != null">is_use = #{isUse},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAuthorCodeById" parameterType="Long">
+        delete from author_code where id = #{id}
+    </delete>
+
+    <delete id="deleteAuthorCodeByIds" parameterType="String">
+        delete from author_code where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
