@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: front_header('作家注册')"/>
+    <style>
+        .registration-form{
+            margin-left: 100px;
+            padding-left: 50px;
+            padding-right: 50px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: darkgrey 10px 10px 30px 5px;
+        }
+        .item{
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 页头 -->
+    <div class="container-fluid">
+
+        <div class="row">
+            <!-- 导航条 -->
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- logo -->
+                    <div class="navbar-header">
+                            <span>
+                                <a th:href="@{/front/index}">
+                                    <img alt="logo" th:src="@{/../../img/logo.png}" width="150px">
+                                </a>
+                            </span>
+                    </div>
+                    <!-- 表单 -->
+                    <form class="navbar-form navbar-left" role="search" th:action="@{/front/index/toNovelResult}" th:method="post">
+                        <div class="form-group">
+                            <input name="bookName" type="text" class="form-control" placeholder="请输入书名...">
+                        </div>
+                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                    </form>
+                    <!-- 书架、登录 -->
+                    <p class="navbar-text navbar-right"><a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toBookShelf}" class="navbar-link"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> 我的书架</a> | <a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toUserInfo}" class="navbar-link" th:text="${user eq null}? '登录' : ${user.userName}">登录</a></p>
+                </div>
+            </nav>
+
+        </div>
+
+    </div>
+
+    <!-- 内容区 -->
+    <div class="container">
+
+        <!-- 面板 -->
+        <div class="channel row">
+
+
+            <div class="col-md-5">
+                <img src="/../../img/loginBg.jpg" alt="背景">
+            </div>
+
+
+            <div class="col-md-7">
+                <div class="registration-form">
+
+                    <h2 class="text-center">作家注册</h2>
+                    <hr>
+
+                    <form id="authorRegis-form">
+                        <div class="row item">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">邀请码：</label>
+                                <div class="col-sm-9">
+                                    <input id="inviteCode" type="text" name="inviteCode" class="form-control" placeholder="请输入邀请码">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row item">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">邮箱：</label>
+                                <div class="col-sm-9">
+                                    <input id="email" type="text" name="email" class="form-control" placeholder="请输入邮箱" th:value="${user.email}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row item">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">手机号码：</label>
+                                <div class="col-sm-9">
+                                    <input id="phonenumber" type="text" name="phonenumber" class="form-control" placeholder="请输入手机号码" th:value="${user.phonenumber}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <p class="text-center">
+                                <input class="btn btn-success btn-block" type="submit" value="注册">
+                                <!--<a class="btn btn-success btn-block" href="#" role="button" onclick="submitHandler()">注册</a>-->
+                            </p>
+                        </div>
+                    </form>
+
+                    <hr>
+                </div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+    <!-- 尾部标签页 -->
+    <hr>
+    <div class="footer">
+        <p class="text-center">基于SpringBoot的网文阅读网的设计与实现 | create by @zqw | 联系方式：goodzhang888@163.com</p>
+    </div>
+
+
+    <th:block th:include="include :: footer" />
+
+    <script th:inline="javascript">
+
+        $(document).ready(function(){
+
+            var icon = "<i class='fa fa-times-circle'></i> ";
+            $("#authorRegis-form").validate({
+                onkeyup: false,
+                rules:{
+                    inviteCode: {
+                        required: true,
+                        remote: {
+                            url: ctx + "front/index/checkAuthorCode",
+                            type: "get",
+                            dataType: "json",
+                            data: {
+                                inviteCode: function() {
+                                    return $("input[name='inviteCode']").val();
+                                }
+                            }
+                        }
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    phonenumber: {
+                        required: true,
+                        isPhone: true
+                    }
+                },
+                messages: {
+                    inviteCode: {
+                        required: icon + "请输入发放的邀请码",
+                        remote: icon + "请输入正确的邀请码"
+                    },
+                    email: {
+                        required: icon + "请输入您的邮箱"
+                    },
+                    phonenumber: {
+                        required: icon + "请输入您的电话"
+                    }
+                },
+                submitHandler:function(form){
+                    var inviteCode = $("#inviteCode").val();
+                    var email = $("#email").val();
+                    var phonenumber = $("#phonenumber").val();
+
+                    $.ajax({
+                        type: "POST",
+                        url: ctx + "front/index/authorRegister",
+                        data: {
+                            inviteCode: inviteCode,
+                            email: email,
+                            phonenumber: phonenumber
+                        },
+                        success: function(result) {
+                            if (result.code == web_status.SUCCESS) {
+
+                                $.modal.msgSuccess(result.msg);
+                                location.href = "/index";
+
+                            } else {
+
+                                $.modal.msgError(result.msg);
+
+                            }
+                        }
+                    });
+
+                }
+            });
+
+        });
+
+
+    </script>
+</body>
+</html>

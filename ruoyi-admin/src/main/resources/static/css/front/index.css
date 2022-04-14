@@ -1,0 +1,90 @@
+.swiper {
+    width: 100%;
+    height: 100%;
+}
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: #fff;
+
+    /* Center slide text vertically */
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+}
+
+.swiper-slide img {
+    display: block;
+    width: 200px;
+    height: 265px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.bookImg img{
+    width: 100px;
+    height: 132px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
+}
+
+.bookTitle a{
+    font-size: 20px;
+    color: #333;
+}
+
+.bookTitle a:link{
+    text-decoration: none;
+}
+
+.bookTitle a:hover{
+    color: rgb(84, 165, 108);
+}
+
+.bookLink{
+    margin-top: 15px;
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: rgb(145, 143, 143);
+}
+
+.bookLink a{
+    color: rgb(145, 143, 143);
+}
+
+.bookLink a:link{
+    text-decoration: none;
+}
+
+.bookLink a:hover{
+    color: rgb(84, 165, 108);
+}
+
+.bookIntro {
+    font-size: 13px;
+    color: #666;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    /* 用来限制在一个块元素显示的文本的行数 */
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+.box-top-right a{
+    color: #333;
+}
+
+.box-top-right a:hover{
+    color: rgb(84, 165, 108);
+    text-decoration: none;
+}

@@ -6,68 +6,90 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.utils.poi.ExcelUtil;
+import com.ruoyi.common.utils.ShiroUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.novel.domain.Book;
-import com.ruoyi.novel.service.IBookService;
+import com.ruoyi.novel.service.impl.BookChapterServiceImpl;
+import com.ruoyi.novel.service.impl.BookServiceImpl;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
-/**
- * 小说Controller
- * 
- * @author zqw
- * @date 2022-03-06
- */
 @Controller
 @RequestMapping("/novel/book")
-public class BookController extends BaseController
-{
-    private String prefix = "novel/book";
+public class BookController extends BaseController {
 
-    @Autowired
-    private IBookService bookService;
+    @Resource
+    private BookServiceImpl bookService;
 
-    @RequiresPermissions("novel:book:view")
+    @Resource
+    private BookChapterServiceImpl bookChapterService;
+
+    private String prefix = "/novel/book";
+
+//    @RequiresPermissions("novel:book:view")
     @GetMapping()
-    public String book()
-    {
+    public String book(Model model){
+
+        //获取user
+        SysUser user = ShiroUtils.getSysUser();
+
+        model.addAttribute("userId", user.getUserId());
+
         return prefix + "/book";
     }
 
     /**
-     * 查询小说列表
+     * 根据作者id查询小说
+     * @param book
+     * @return
      */
-    @RequiresPermissions("novel:book:list")
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(Book book)
-    {
+    public TableDataInfo list(Book book){
+
+        //查询当前作者的作品
+        SysUser user = ShiroUtils.getSysUser();
+        book.setAuthorId(user.getUserId());
+
         startPage();
-        List<Book> list = bookService.selectBookList(book);
-        return getDataTable(list);
+        List<Book> books = bookService.selectBookList(book);
+
+        return getDataTable(books);
+
     }
 
     /**
-     * 导出小说列表
+     * 获取最新章节信息
+     * @param id    小说id
+     * @return
      */
-    @RequiresPermissions("novel:book:export")
-    @Log(title = "小说", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
+    @PostMapping("/getlastChapterTitle")
     @ResponseBody
-    public AjaxResult export(Book book)
-    {
-        List<Book> list = bookService.selectBookList(book);
-        ExcelUtil<Book> util = new ExcelUtil<Book>(Book.class);
-        return util.exportExcel(list, "小说数据");
+    public String list(Long id){
+
+
+        //查询最大章节索引
+        Integer MaxChapterIndex = bookChapterService.selectMaxChapterIndexByBookId(id);
+
+        if (StringUtils.isNull(MaxChapterIndex)){
+            return null;
+        }
+        //根据bookID与章节索引查询最新章节标题
+        String chapterTitle = bookService.getlastChapterTitle(id,MaxChapterIndex);
+
+        return chapterTitle;
+
     }
 
     /**
-     * 新增小说
+     * 跳转新增小说页面
      */
     @GetMapping("/add")
     public String add()
@@ -76,53 +98,94 @@ public class BookController extends BaseController
     }
 
     /**
-     * 新增保存小说
+     * 新增小说
+     * @param book
+     * @return
      */
-    @RequiresPermissions("novel:book:add")
-    @Log(title = "小说", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult addSave(Book book)
-    {
-        //获取当前作者id
-        SysUser user = getSysUser();
+    public AjaxResult addSave(@Validated Book book){
+
+        //获得用户id设置为authorId
+        SysUser user = ShiroUtils.getSysUser();
         book.setAuthorId(user.getUserId());
-        return toAjax(bookService.insertBook(book));
+        book.setAuthorName(user.getUserName());
+
+        boolean result = bookService.insertNewBook(book);
+
+        return toAjax(result);
+
     }
 
     /**
-     * 修改小说
+     * 跳转目录页
+     * @return
      */
-    @RequiresPermissions("novel:book:edit")
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    @RequestMapping("/bookChapter/{id}")
+    public String toBookChapter(@PathVariable("id")Long id, Model model) {
+
+        model.addAttribute("bookId",id);
+
+        return "/novel/bookChapter/bookChapter";
+    }
+
+    /**
+     * 删除小说、目录和章节
+     * @param ids
+     * @return
+     */
+    //@RequiresPermissions("system:post:remove")
+    @PostMapping("/remove")
+    @ResponseBody
+    public AjaxResult remove(String ids)
     {
-        Book book = bookService.selectBookById(id);
-        mmap.put("book", book);
+        try
+        {
+            return toAjax(bookService.deleteBookByIds(ids));
+        }
+        catch (Exception e)
+        {
+            return error(e.getMessage());
+        }
+    }
+
+    /**
+     * 跳转修改小说界面
+     * @param bookId
+     * @param mmap
+     * @return
+     */
+    // @RequiresPermissions("system:post:edit")
+    @GetMapping("/edit/{bookId}")
+    public String edit(@PathVariable("bookId") Long bookId, ModelMap mmap)
+    {
+
+        Book book = bookService.selectBookByBookId(bookId);
+        mmap.put("book",book);
+
         return prefix + "/edit";
     }
 
     /**
-     * 修改保存小说
+     * 修改小说
+     * @param book
+     * @return
      */
-    @RequiresPermissions("novel:book:edit")
-    @Log(title = "小说", businessType = BusinessType.UPDATE)
+    // @RequiresPermissions("system:post:edit")
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult editSave(Book book)
+    public AjaxResult editSave(@Validated Book book)
     {
-        return toAjax(bookService.updateBook(book));
+
+        boolean result = bookService.updateById(book);
+
+        if (result){
+            return AjaxResult.success("修改书籍信息成功！");
+        }
+
+        return AjaxResult.error("修改书籍信息失败！");
     }
 
-    /**
-     * 删除小说
-     */
-    @RequiresPermissions("novel:book:remove")
-    @Log(title = "小说", businessType = BusinessType.DELETE)
-    @PostMapping( "/remove")
-    @ResponseBody
-    public AjaxResult remove(String ids)
-    {
-        return toAjax(bookService.deleteBookByIds(ids));
-    }
+
+
 }

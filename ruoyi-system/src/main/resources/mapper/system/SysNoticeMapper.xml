@@ -81,5 +81,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{noticeId}
         </foreach>
     </delete>
-    
+
+    <select id="selectListOrderCreateTime" parameterType="SysNotice" resultMap="SysNoticeResult">
+        <include refid="selectNoticeVo"/>
+        order by create_time desc
+    </select>
+
+
+
 </mapper>

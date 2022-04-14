@@ -212,12 +212,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
-            <!-- 小说模块-->
+            <!--     小说模块       -->
             <dependency>
                 <groupId>com.ruoyi</groupId>
                 <artifactId>novel</artifactId>
-                <version>4.7.3</version>
+                <version>0.0.1-SNAPSHOT</version>
             </dependency>
+
 
         </dependencies>
     </dependencyManagement>

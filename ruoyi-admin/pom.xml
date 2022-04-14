@@ -67,11 +67,13 @@
             <artifactId>ruoyi-generator</artifactId>
         </dependency>
 
-        <!-- 小说模块-->
+        <!-- 小说-->
         <dependency>
             <groupId>com.ruoyi</groupId>
             <artifactId>novel</artifactId>
         </dependency>
+
+
 
     </dependencies>
 

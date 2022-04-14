@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('新增章节')" />
+</head>
+<body>
+    <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="chapter-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <!--TODO 设置章节名称与内容的非空校验-->
+                                章节标题：<input type="text" id="chapterTitle" name="chapterTitle" required/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="uploadChapter()"><i class="glyphicon glyphicon-upload"></i>&nbsp;上传</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+
+            <div class="col-sm-12 select-table table-striped">
+                <!-- 设置bookID隐藏域 -->
+                <input type="hidden" id="bookId" th:value="${bookId}" />
+                <div id="chapterContent">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--<th:block th:include="include :: footer" />-->
+    <script th:inline="javascript"> var ctx = [[@{/}]]; var lockscreen = [[${session.lockscreen}]]; if(lockscreen){window.top.location=ctx+"lockscreen";} </script>
+    <a id="scroll-up" href="#" class="btn btn-sm display"><i class="fa fa-angle-double-up"></i></a>
+    <script th:src="@{/js/jquery.min.js?v=3.6.0}"></script>
+    <!-- 遮罩层 -->
+    <script th:src="@{/ajax/libs/blockUI/jquery.blockUI.js?v=2.70.0}"></script>
+    <!--<script th:src="@{/ajax/libs/iCheck/icheck.min.js?v=1.0.3}"></script>-->
+    <script th:src="@{/ajax/libs/layer/layer.min.js?v=3.5.1}"></script>
+    <!--<script th:src="@{/ajax/libs/layui/layui.min.js?v=2.6.8}"></script>-->
+    <!--<script th:src="@{/ruoyi/js/common.js?v=4.7.3}"></script>-->
+    <script th:src="@{/ruoyi/js/ry-ui.js?v=4.7.3}"></script>
+
+    <!-- 添加富文本编辑器插件 -->
+    <script th:src="@{/js/plugins/WangEditor/wangEditor.js}"></script>
+
+    <script th:inline="javascript">
+        var prefix = ctx + "novel/bookChapter";
+
+        const E = window.wangEditor;
+        const editor = new E('#chapterContent');
+
+        //设置编辑区区域高度
+        editor.config.height = 900;
+
+        editor.create();
+
+        //上传章节信息
+        function uploadChapter(){
+            //章节标题
+            var chapterTitle = $("#chapterTitle").val();
+            //章节内容
+            var chapterContent = editor.txt.html();
+            //章节字数
+            var chapterWord = editor.txt.text().length;
+
+            //打开遮罩层
+            $.modal.loading("正在提交信息，请稍后...");
+
+            //添加章节内容   --  返回contentId
+            $.operate.post(prefix + "/addContent", {
+                //章节内容
+                chapterContent:chapterContent
+
+                },function (result) {
+
+                    if (result.code == 0){
+                        //添加章节内容成功！
+                        //将小说ID（固定）、内容ID、章节标题等信息添加到当前目录表中
+                        $.operate.post(prefix + "/add",{
+                            //小说ID
+                            bookId:$("#bookId").val(),
+                            //章节标题
+                            chapterTitle: chapterTitle,
+                            //内容ID
+                            chapterId: result.data.id,
+                            //章节字数
+                            chapterWord: chapterWord
+                        },function (result) {
+
+                            // 关闭遮罩层信息
+                            $.modal.closeLoading();
+
+                        });
+                    }else {
+
+                        // 关闭遮罩层信息
+                        $.modal.closeLoading();
+                        //添加章节内容失败！
+                        $.modal.msgError("章节信息添加失败，请联系管理员！");
+                    }
+
+            });
+        }
+    </script>
+</body>
+</html>

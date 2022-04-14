@@ -40,6 +40,28 @@
 	<script th:src="@{/ruoyi/js/ry-ui.js?v=4.7.3}"></script>
 </div>
 
+<!-- front通用CSS -->
+<head th:fragment="front_header(title)">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="keywords" content="">
+	<meta name="description" content="">
+	<title th:text="${title}"></title>
+	<!-- 清除默认样式CSS -->
+	<link th:href="@{/css/front/reset.css}" rel="stylesheet"/>
+	<link th:href="@{/css/front/normalize.css}" rel="stylesheet"/>
+
+	<link th:href="@{/css/bootstrap.min.css?v=3.3.7}" rel="stylesheet"/>
+	<link th:href="@{/css/font-awesome.min.css?v=4.7.3}" rel="stylesheet"/>
+	<link rel="stylesheet" th:href="@{/css/front/common.css}">
+</head>
+
+<!-- index页css -->
+<div th:fragment="index-css">
+	<link rel="stylesheet" th:href="@{/css/front/index.css}">
+</div>
+
 <!-- ztree树插件 -->
 <div th:fragment="ztree-css">
     <link th:href="@{/ajax/libs/jquery-ztree/3.5/css/metro/zTreeStyle.css}" rel="stylesheet"/>
@@ -111,6 +133,8 @@
     <link th:href="@{/ajax/libs/bootstrap-fileinput/fileinput.min.css?v=5.2.4}" rel="stylesheet"/>
 </div>
 <div th:fragment="bootstrap-fileinput-js">
+	<!--  调整图像大小插件	-->
+	<script th:src="@{/ajax/libs/bootstrap-fileinput/piexif.min.js}"></script>
     <script th:src="@{/ajax/libs/bootstrap-fileinput/fileinput.min.js?v=5.2.4}"></script>
 </div>
 
@@ -219,4 +243,33 @@
 <!-- 表格视图分页插件 -->
 <div th:fragment="bootstrap-table-custom-view-js">
 	<script th:src="@{/ajax/libs/bootstrap-table/extensions/custom-view/bootstrap-table-custom-view.js?v=1.18.3}"></script>
+</div>
+
+<!-- 轮播图插件 -->
+<!-- 轮播图css -->
+<div th:fragment="swiper-bundle-css">
+	<link th:href="@{/css/front/swiper-bundle.css}"  rel="stylesheet">
+</div>
+<!-- 轮播图js -->
+<div th:fragment="swiper-bundle-js">
+	<script th:src="@{/js/plugins/Swiper/swiper-bundle.js}"></script>
+</div>
+
+<!--session插件-->
+<div th:fragment="jquery-session-js">
+	<script th:src="@{/js/jquery.session.js}"></script>
+</div>
+
+<!-- 星级打分插件 -->
+<div th:fragment="star-rating-css">
+	<link rel="stylesheet" th:href="@{/css/front/star-rating.css}">
+</div>
+<div th:fragment="star-rating-js">
+	<script th:src="@{/js/plugins/star-rating/star-rating.js}"></script>
+	<script th:src="@{/js/plugins/star-rating/theme.js}"></script>
+</div>
+
+<!-- long类型插件 -->
+<div th:fragment="long-js">
+	<script th:src="@{/js/plugins/long/index.js}"></script>
 </div>

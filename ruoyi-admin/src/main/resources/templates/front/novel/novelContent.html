@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <title th:text="${chapter.chapterTitle}"></title>
+    <!-- 清除默认样式CSS -->
+    <link th:href="@{/../../css/front/reset.css}" rel="stylesheet"/>
+    <link th:href="@{/../../css/front/normalize.css}" rel="stylesheet"/>
+
+    <link th:href="@{/../../css/bootstrap.min.css?v=3.3.7}" rel="stylesheet"/>
+    <link th:href="@{/../../css/font-awesome.min.css?v=4.7.3}" rel="stylesheet"/>
+
+    <style>
+        body{
+            background-color: rgb(217, 205, 182);
+            font: 13px/1.5 PingFangSC-Regular,HelveticaNeue-Light,'Helvetica Neue Light','Microsoft YaHei',sans-serif,"宋体";;
+        }
+
+        .navbar{
+            background-color: #fff;
+            padding: 10px;
+            margin-bottom: 0px;
+        }
+
+        .readChannel{
+            border-radius: 10px;
+            margin-top: 25px;
+            margin-bottom: 25px;
+            padding-left: 100px;
+            padding-right: 100px;
+            padding-bottom: 80px;
+        }
+
+        .chapterTitle{
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            padding-top: 80px;
+            padding-bottom: 10px;
+
+        }
+        .chapterInfo{
+            color: #999;
+            font-size: 12px;
+        }
+        .line{
+            border-top: 1px dotted #ccc;
+            height: 1px;
+            overflow: hidden;
+            display: block;
+        }
+
+        .content{
+            font-family: 宋体, SimSun, STSong;
+            letter-spacing: 1px;
+            line-height: 2em;
+            text-indent: 2em;
+        }
+
+        .btnGroup .btn{
+            background-color: rgb(242, 231, 208);
+        }
+
+        .footer{
+            color: #999;
+            letter-spacing: 1px;
+            line-height: 23px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 页头部分 -->
+    <div class="container-fluid" style="background-color: #fff;">
+
+        <!-- 页头 -->
+        <div class="container">
+
+            <div class="row">
+                <!-- 导航条 -->
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <!-- logo -->
+                        <div class="navbar-header">
+                        <span>
+                            <a th:href="@{/front/index}">
+                                <img alt="logo" th:src="@{/../../img/logo.png}" width="150px">
+                            </a>
+                        </span>
+                        </div>
+                        <!-- 表单 -->
+                        <form class="navbar-form navbar-left" role="search">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="书名、作者、关键字">
+                            </div>
+                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                        </form>
+                        <!-- 书架、登录 -->
+                        <p class="navbar-text navbar-right"><a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toBookShelf}" class="navbar-link"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> 我的书架</a> | <a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toUserInfo}" class="navbar-link" th:text="${user eq null}? '登录' : ${user.userName}">登录</a></p>
+                    </div>
+                </nav>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 阅读面板 -->
+    <div class="readChannel container" style="background-color: rgb(250, 238, 215);">
+
+        <p class="chapterTitle text-center" th:text="${chapter.chapterTitle}">第1章 很野的少年</p>
+        <p class="chapterInfo text-center">
+            字数：<span th:text="${chapter.chapterWord}">3346</span>&nbsp;&nbsp; |&nbsp;&nbsp; 更新时间：<span th:text="${#dates.format(chapter.updateTime, 'yyyy-MM-dd HH:mm:ss')}">2021-08-16 00:27:39</span>
+            <span class="text-right"></span>
+        </p>
+        <p class="text-right"><a class="btn btn-default"  th:href="@{/front/novel/toBookChapter(id=${chapter.bookId})}" role="button" style="background-color: rgb(242, 231, 208);">查看目录</a></p>
+
+        <div class="line"></div>
+        <hr>
+
+        <!-- 章节内容区 -->
+        <div class="content" th:utext="${content.chapterContent}">
+
+        </div>
+
+        <hr>
+        <div class="line"></div>
+        <hr>
+
+        <!--  底部按钮  -->
+        <div class="btnGroup row">
+
+            <div class="preChapter col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <a th:class="${chapter.chapterIndex eq 1}? 'btn btn-default btn-lg btn-block disabled':'btn btn-default btn-lg btn-block'" th:href="@{/front/novel/toChapter(bookId=${chapter.bookId},chapterIndex=${chapter.chapterIndex}-1)}" role="button">上一章</a>
+            </div>
+
+
+            <div class="book-chapter col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <a class="btn btn-default btn-lg btn-block" th:href="@{/front/novel/toBookChapter(id=${chapter.bookId})}" role="button">查看目录</a>
+            </div>
+
+
+            <div class="nextChapter col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <a th:class="${chapter.chapterIndex eq maxChpaterIndex}? 'btn btn-default btn-lg btn-block disabled':'btn btn-default btn-lg btn-block'" th:href="@{/front/novel/toChapter(bookId=${chapter.bookId},chapterIndex=${chapter.chapterIndex}+1)}" role="button">下一章</a>
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <!-- 尾部标签页 -->
+    <div class="footer container">
+        <p class="text-center">基于SpringBoot的网文阅读网的设计与实现 | create by @zqw | 联系方式：goodzhang888@163.com</p>
+    </div>
+</body>
+</html>

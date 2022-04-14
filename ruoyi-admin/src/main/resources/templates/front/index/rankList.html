@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: front_header('排行榜')"/>
+    <style>
+        .rankType ul li{
+            margin-bottom: 10px;
+        }
+        .rankType a{
+            color: black;
+        }
+        .rankType a:hover{
+            color: rgb(84, 165, 108);
+            text-decoration: none;
+        }
+        .line{
+            padding-left: 0px;
+            padding-right: 0px;
+            text-align: center;
+        }
+        .line a{
+            color: black;
+        }
+        .line a:hover{
+            color: rgb(84, 165, 108);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 页头 -->
+    <div class="container">
+
+        <div class="row">
+            <!-- 导航条 -->
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- logo -->
+                    <div class="navbar-header">
+                            <span>
+                                <a th:href="@{/front/index}">
+                                    <img alt="logo" th:src="@{/../../img/logo.png}" width="150px">
+                                </a>
+                            </span>
+                    </div>
+                    <!-- 表单 -->
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="书名、作者、关键字">
+                        </div>
+                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                    </form>
+                    <!-- 书架、登录 -->
+                    <p class="navbar-text navbar-right"><a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toBookShelf}" class="navbar-link"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> 我的书架</a> | <a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toUserInfo}" class="navbar-link" th:text="${user eq null}? '登录' : ${user.userName}">登录</a></p>
+                </div>
+            </nav>
+
+        </div>
+
+    </div>
+    <!-- 导航栏 -->
+    <div class="navtab" style="background-color:rgb(84, 165, 108);">
+
+        <div class="container">
+
+            <div class="row">
+                <ul class="nav nav-tabs">
+                    <li role="presentation"><a th:href="@{/front/index}">首页</a></li>
+                    <li role="presentation"><a th:href="@{/front/index/allWork}">全部作品</a></li>
+                    <li role="presentation" class="active"><a th:href="@{/front/index/toRankList}">排行榜</a></li>
+                    <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 内容区 -->
+    <div class="container">
+
+        <!-- 上部面板 -->
+        <div class="channel row">
+
+            <!-- 榜单区 -->
+            <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
+                <h3>点击榜</h3>
+                <hr>
+
+                <!-- 标签行 -->
+                <div class="row">
+
+                    <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                        <strong>序号</strong>
+                    </div>
+
+
+                    <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                        <strong>小说分类</strong>
+                    </div>
+
+                    <div class="line col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <strong>小说名称</strong>
+                    </div>
+
+                    <div class="line col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <strong>更新时间</strong>
+                    </div>
+
+                    <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                        <strong>状态</strong>
+                    </div>
+
+                    <div class="line col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <strong>作者</strong>
+                    </div>
+
+                    <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                        <strong>字数</strong>
+                    </div>
+
+                </div>
+
+                <!-- 内容行 -->
+                <th:block th:each="book,bookStat:${pageInfo.list}">
+
+                    <div class="row">
+
+                        <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <span th:text="${bookStat.count + (pageInfo.pageNum - 1)*pageInfo.pageSize}"></span>
+                        </div>
+
+
+                        <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <a href="#" th:text="${@dict.getLabel('book_category', book.bookCategory)}">小说分类</a>
+                        </div>
+
+
+                        <div class="line col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                            <a th:href="@{/front/novel(id=${book.id})}" th:text="${book.bookName}">小说名称</a>
+                        </div>
+
+
+                        <div class="line col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                            <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}">更新时间</span>
+                        </div>
+
+                        <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <a href="" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">状态</a>
+                        </div>
+
+                        <div class="line col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                            <span th:text="${book.authorName}">作者</span>
+                        </div>
+
+                        <div class="line col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                            <span th:text="${book.bookWord}">字数</span>
+                        </div>
+
+                    </div>
+
+                </th:block>
+
+                <hr>
+                <!--分页栏-->
+                <nav aria-label="Page navigation" class="text-right">
+                    <ul class="pagination">
+                        <li th:class="${pageInfo.isFirstPage}? 'disabled'"><a th:href="@{/front/rankList/list/{id}(queryItem=${currentQueryItem},pageNum=1,pageSize=10)}">首页</a></li>
+                        <li th:class="${pageInfo.isFirstPage}? 'disabled'">
+                            <a th:if="${pageInfo.hasPreviousPage}" th:href="@{/front/rankList/list/{id}(queryItem=${currentQueryItem},pageNum=${pageInfo.prePage},pageSize=10)}">
+                                上一页
+                            </a>
+                        </li>
+                        <!-- 超出部分显示省略号 -->
+                        <li th:if="${pageInfo.navigateFirstPage &gt; 1}"><span>&hellip;</span></li>
+                        <!-- 导航页码 -->
+                        <th:block th:each="num : ${pageInfo.navigatepageNums}">
+                            <li th:class="${pageInfo.pageNum == num} ? 'active'">
+                                <a th:href="@{/front/rankList/list/{id}(queryItem=${currentQueryItem},pageNum=${num},pageSize=10)}" th:text="${num}">1</a>
+                            </li>
+                        </th:block>
+                        <!-- 超出部分显示省略号 -->
+                        <li th:if="${pageInfo.navigateLastPage &lt; pageInfo.pages}"><span>&hellip;</span></li>
+                        <li th:class="${pageInfo.isLastPage}? 'disabled'">
+                            <a th:if="${pageInfo.hasNextPage}" th:href="@{/front/rankList/list/{id}(queryItem=${currentQueryItem},pageNum=${pageInfo.nextPage},pageSize=10)}">
+                                下一页
+                            </a>
+                        </li>
+                        <li th:class="${pageInfo.isLastPage}? 'disabled'"><a th:href="@{/front/rankList/list/{id}(queryItem=${currentQueryItem},pageNum=${pageInfo.pages},pageSize=10)}">末页</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- 榜单类别 -->
+            <div class="rankType col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                <h3>榜单类别</h3>
+                <hr>
+                <ul>
+                    <li>
+                        <a th:href="@{/front/rankList/list/{id}(queryItem=0,pageNum=1,pageSize=10)}">
+                            <h5>点击榜</h5>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/front/rankList/list/{id}(queryItem=1,pageNum=1,pageSize=10)}">
+                            <h5>订阅榜</h5>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/front/rankList/list/{id}(queryItem=2,pageNum=1,pageSize=10)}">
+                            <h5>更新榜</h5>
+                        </a>
+                    </li>
+                    <!--<li>评论榜</li>-->
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 尾部标签页 -->
+    <hr>
+    <div class="footer container">
+        <p class="text-center">基于SpringBoot的网文阅读网的设计与实现 | create by @zqw | 联系方式：goodzhang888@163.com</p>
+    </div>
+
+    <th:block th:include="include :: footer" />
+
+    <script th:inline="javascript">
+
+
+
+    </script>
+</body>
+</html>

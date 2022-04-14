@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <th:block th:include="include :: front_header('修改密码')"/>
+
+    <style>
+        .box-left li{
+            margin-bottom: 20px;
+        }
+        .box-left li a{
+            text-decoration: none;
+            color: black;
+        }
+        .box-left li a:hover{
+            color: rgb(84, 165, 108);
+        }
+        .box-left li span{
+            color: rgb(84, 165, 108);
+        }
+        .userInfo{
+            margin-top: 10px;
+            width: 400px;
+        }
+        .userInfo .form-control{
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 页头 -->
+    <div class="container">
+
+        <div class="row">
+            <!-- 导航条 -->
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- logo -->
+                    <div class="navbar-header">
+                            <span>
+                                <a th:href="@{/front/index}">
+                                    <img alt="logo" th:src="@{/../../img/logo.png}" width="150px">
+                                </a>
+                            </span>
+                    </div>
+                    <!-- 表单 -->
+                    <form class="navbar-form navbar-left" role="search" th:action="@{/front/index/toNovelResult}" th:method="post">
+                        <div class="form-group">
+                            <input name="bookName" type="text" class="form-control" placeholder="请输入书名...">
+                        </div>
+                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                    </form>
+                    <!-- 书架、登录 -->
+                    <p class="navbar-text navbar-right"><a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toBookShelf}" class="navbar-link"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> 我的书架</a> | <a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toUserInfo}" class="navbar-link" th:text="${user eq null}? '登录' : ${user.userName}">登录</a></p>
+                </div>
+            </nav>
+
+        </div>
+
+    </div>
+
+    <!-- 导航栏 -->
+    <div class="navtab" style="background-color:rgb(84, 165, 108);">
+
+        <div class="container">
+
+            <div class="row">
+                <ul class="nav nav-tabs">
+                    <li role="presentation" class="active"><a th:href="@{/front/index}">首页</a></li>
+                    <li role="presentation"><a th:href="@{/front/index/allWork}">全部作品</a></li>
+                    <li role="presentation"><a th:href="@{/front/index/toRankList}">排行榜</a></li>
+                    <!-- th:href="@{/front/index/toAuthorRegis}" -->
+                    <li role="presentation"><a th:href="@{/index}">作家专区</a></li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 内容区 -->
+    <div class="container">
+
+        <div class="channel row">
+            <hr/>
+
+            <!-- 左栏 -->
+            <div class="box-left col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                <ul>
+                    <li>
+                        <span class="fa fa-user-circle-o fa-fw"></span>
+                        <a th:href="@{/front/index/toUserInfo}">个人中心</a>
+                    </li>
+                    <li>
+                        <span class="fa fa-book fa-fw"></span>
+                        <a th:href="@{/front/index/toBookShelf}">我的书架</a>
+                    </li>
+                    <li>
+                        <span class="fa fa-commenting fa-fw"></span>
+                        <a href="">我的书评</a>
+                    </li>
+                    <li>
+                        <span class="fa fa-gear fa-fw"></span>
+                        <a href="">我的反馈</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 右栏 -->
+            <div class="box-right col-xs-10 col-sm-10 col-md-10 col-lg-10">
+
+                <div class="row">
+                    <ul class="nav nav-tabs">
+                        <li role="presentation"><a th:href="@{/front/index/toUserInfo}">基本信息</a></li>
+                        <li role="presentation" class="active"><a th:href="@{/front/index/toPwChange}">修改密码</a></li>
+                    </ul>
+                </div>
+
+                <!-- 信息介绍 -->
+                <div class="row">
+
+                    <div class="userInfo">
+
+                        <form id="user-info-form">
+                            <div  class="form-group">
+                                <label class="col-sm-3 control-label is-required">旧密码：</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" type="password" name="oldPassword" id="oldPassword"placeholder="请输入旧密码">
+                                </div>
+                            </div>
+                            <div  class="form-group">
+                                <label class="col-sm-3 control-label is-required">新密码：</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" type="password" name="newPassword" id="newPassword"placeholder="请输入新密码">
+                                </div>
+                            </div>
+                            <div  class="form-group">
+                                <label class="col-sm-3 control-label is-required">再次确认：</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" type="password" name="confirmPassword" id="confirmPassword"placeholder="请再次输入密码">
+                                </div>
+                            </div>
+                            <p>
+                                <input class="btn btn-success" type="submit" value="确认修改">
+                            </p>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 尾部标签页 -->
+    <hr>
+    <div class="footer container">
+        <p class="text-center">基于SpringBoot的网文阅读网的设计与实现 | create by @zqw | 联系方式：goodzhang888@163.com</p>
+    </div>
+
+    <th:block th:include="include :: footer" />
+
+    <script th:inline="javascript">
+
+        $(document).ready(function(){
+
+            var icon = "<i class='fa fa-times-circle'></i> ";
+            $('#user-info-form').validate({
+                onkeyup: false,
+                rules:{
+                    oldPassword:{
+                        required:true,
+                        remote: {
+                            url: ctx + "front/userInfo/checkPassword",
+                            type: "get",
+                            dataType: "json",
+                            data: {
+                                password: function() {
+                                    return $("input[name='oldPassword']").val();
+                                }
+                            }
+                        }
+                    },
+                    newPassword: {
+                        required: true,
+                        minlength: 5,
+                        maxlength: 20
+                    },
+                    confirmPassword: {
+                        required: true,
+                        equalTo: "#newPassword"
+                    }
+                },
+                messages: {
+                    oldPassword: {
+                        required: "请输入原密码",
+                        remote: "原密码错误"
+                    },
+                    newPassword: {
+                        required: "请输入新密码",
+                        minlength: "密码不能小于5个字符",
+                        maxlength: "密码不能大于20个字符"
+                    },
+                    confirmPassword: {
+                        required: "请再次输入新密码",
+                        equalTo: "两次密码输入不一致"
+                    }
+
+                },
+                focusCleanup: true,
+                submitHandler:function(form){
+
+                    var oldPassword = $("#oldPassword").val();
+                    var newPassword = $("#newPassword").val();
+
+                    $.post(ctx + "front/userInfo/resetPwd",{
+
+                        oldPassword: oldPassword,
+                        newPassword: newPassword
+
+                    },function (result) {
+                        if (result.code == web_status.SUCCESS){
+                            $.modal.msgSuccess(result.msg);
+                            location.href = ctx + "front/index/toUserInfo";
+                        }else {
+                            $.modal.msgError(result.msg);
+                        }
+
+                    });
+
+                }
+
+
+            });
+
+        });
+
+    </script>
+</body>
+</html>

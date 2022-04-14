@@ -1,96 +1,127 @@
 package com.ruoyi.novel.service.impl;
 
-import java.util.List;
-import com.ruoyi.common.utils.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.ruoyi.novel.mapper.AuthorCodeMapper;
-import com.ruoyi.novel.domain.AuthorCode;
-import com.ruoyi.novel.service.IAuthorCodeService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.text.Convert;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.novel.domain.AuthorCode;
+import com.ruoyi.novel.service.AuthorCodeService;
+import com.ruoyi.novel.mapper.AuthorCodeMapper;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * 邀请码Service业务层处理
- * 
- * @author zqw
- * @date 2022-03-06
- */
+* @author 64829
+* @description 针对表【author_code(作家邀请码表)】的数据库操作Service实现
+* @createDate 2022-04-12 14:01:23
+*/
 @Service
-public class AuthorCodeServiceImpl implements IAuthorCodeService 
-{
-    @Autowired
+public class AuthorCodeServiceImpl extends ServiceImpl<AuthorCodeMapper, AuthorCode>
+    implements AuthorCodeService{
+
+    @Resource
     private AuthorCodeMapper authorCodeMapper;
 
     /**
-     * 查询邀请码
-     * 
-     * @param id 邀请码主键
-     * @return 邀请码
+     * 查询邀请码信息集合
+     * @param authorCode
+     * @return
      */
     @Override
-    public AuthorCode selectAuthorCodeById(Long id)
-    {
-        return authorCodeMapper.selectAuthorCodeById(id);
+    public List<AuthorCode> selectAuthorCodeList(AuthorCode authorCode) {
+        QueryWrapper<AuthorCode> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(StringUtils.isNotEmpty(authorCode.getInviteCode()),"invite_code",authorCode.getInviteCode())
+                .eq(StringUtils.isNotEmpty(authorCode.getCreateUser()),"create_user",authorCode.getCreateUser())
+                .eq(StringUtils.isNotNull(authorCode.getIsUse()),"is_use",authorCode.getIsUse());
+        return authorCodeMapper.selectList(queryWrapper);
     }
 
     /**
-     * 查询邀请码列表
-     * 
-     * @param authorCode 邀请码
-     * @return 邀请码
+     * 根据id查询邀请码
+     * @param id
+     * @return
      */
     @Override
-    public List<AuthorCode> selectAuthorCodeList(AuthorCode authorCode)
-    {
-        return authorCodeMapper.selectAuthorCodeList(authorCode);
+    public AuthorCode selectAuthorCodeById(Long id) {
+
+        return  authorCodeMapper.selectById(id);
+
     }
 
     /**
-     * 新增邀请码
-     * 
-     * @param authorCode 邀请码
-     * @return 结果
+     * 校验邀请码信息是否唯一
+     * @param authorCode
+     * @return
      */
     @Override
-    public int insertAuthorCode(AuthorCode authorCode)
-    {
-        authorCode.setCreateTime(DateUtils.getNowDate());
-        return authorCodeMapper.insertAuthorCode(authorCode);
+    public String checkInviteCodeUnique(AuthorCode authorCode) {
+
+        Long id = StringUtils.isNull(authorCode.getId()) ? -1L : authorCode.getId();
+
+        QueryWrapper<AuthorCode> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("invite_code",authorCode.getInviteCode());
+        AuthorCode info = authorCodeMapper.selectOne(queryWrapper);
+
+        if (StringUtils.isNotNull(info) && info.getId().longValue() != id.longValue())
+        {
+            return UserConstants.POST_CODE_NOT_UNIQUE;
+        }
+        return UserConstants.POST_CODE_UNIQUE;
     }
 
     /**
-     * 修改邀请码
-     * 
-     * @param authorCode 邀请码
-     * @return 结果
+     * 批量删除邀请码信息
+     * @param ids
+     * @return
      */
     @Override
-    public int updateAuthorCode(AuthorCode authorCode)
-    {
-        return authorCodeMapper.updateAuthorCode(authorCode);
+    public int deleteAuthorCodeByIds(String ids) {
+
+        Long[] authorCodeIds = Convert.toLongArray(ids);
+
+        return authorCodeMapper.deleteBatchIds(Arrays.asList(authorCodeIds));
+
     }
 
     /**
-     * 批量删除邀请码
-     * 
-     * @param ids 需要删除的邀请码主键
-     * @return 结果
+     * 检查邀请码是否有效
+     * @param inviteCode
+     * @return
      */
     @Override
-    public int deleteAuthorCodeByIds(String ids)
-    {
-        return authorCodeMapper.deleteAuthorCodeByIds(Convert.toStrArray(ids));
+    public Boolean checkCode(String inviteCode) {
+
+        QueryWrapper<AuthorCode> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("invite_code",inviteCode).eq("is_use",0);
+        AuthorCode authorCode = authorCodeMapper.selectOne(queryWrapper);
+
+        if (StringUtils.isNotNull(authorCode)){
+            return true;
+        }
+
+        return false;
     }
 
     /**
-     * 删除邀请码信息
-     * 
-     * @param id 邀请码主键
-     * @return 结果
+     * 根据邀请码内容查询记录
+     * @param inviteCode
+     * @return
      */
     @Override
-    public int deleteAuthorCodeById(Long id)
-    {
-        return authorCodeMapper.deleteAuthorCodeById(id);
+    public AuthorCode selectAuthorCodeByCode(String inviteCode) {
+
+        QueryWrapper<AuthorCode> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("invite_code",inviteCode);
+        AuthorCode authorCode = authorCodeMapper.selectOne(queryWrapper);
+
+        return authorCode;
     }
 }
+
+
+
+

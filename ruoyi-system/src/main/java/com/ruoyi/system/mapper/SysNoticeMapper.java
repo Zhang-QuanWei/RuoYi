@@ -1,4 +1,6 @@
 package com.ruoyi.system.mapper;
+import org.apache.ibatis.annotations.Param;
+import java.util.Date;
 
 import java.util.List;
 import com.ruoyi.system.domain.SysNotice;
@@ -49,4 +51,12 @@ public interface SysNoticeMapper
      * @return 结果
      */
     public int deleteNoticeByIds(String[] noticeIds);
+
+    /**
+     * 按照创建时间降序查询公告
+     * @param notice
+     * @return
+     */
+    public List<SysNotice> selectListOrderCreateTime(SysNotice notice);
+
 }

@@ -1,61 +1,25 @@
 package com.ruoyi.novel.mapper;
 
-import java.util.List;
 import com.ruoyi.novel.domain.Book;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
- * 小说Mapper接口
- * 
- * @author zqw
- * @date 2022-03-06
- */
-public interface BookMapper 
-{
-    /**
-     * 查询小说
-     * 
-     * @param id 小说主键
-     * @return 小说
-     */
-    public Book selectBookById(Long id);
+* @author 64829
+* @description 针对表【book】的数据库操作Mapper
+* @createDate 2022-03-15 00:56:31
+* @Entity com.ruoyi.novel.domain.Book
+*/
+public interface BookMapper extends BaseMapper<Book> {
 
-    /**
-     * 查询小说列表
-     * 
-     * @param book 小说
-     * @return 小说集合
-     */
-    public List<Book> selectBookList(Book book);
+    List<Book> selectBookList(Book book);
 
-    /**
-     * 新增小说
-     * 
-     * @param book 小说
-     * @return 结果
-     */
-    public int insertBook(Book book);
 
-    /**
-     * 修改小说
-     * 
-     * @param book 小说
-     * @return 结果
-     */
-    public int updateBook(Book book);
 
-    /**
-     * 删除小说
-     * 
-     * @param id 小说主键
-     * @return 结果
-     */
-    public int deleteBookById(Long id);
-
-    /**
-     * 批量删除小说
-     * 
-     * @param ids 需要删除的数据主键集合
-     * @return 结果
-     */
-    public int deleteBookByIds(String[] ids);
 }
+
+
+
+

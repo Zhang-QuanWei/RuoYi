@@ -1,0 +1,31 @@
+body{
+    background-color: rgb(245, 245, 245);
+    font: 13px/1.5 PingFangSC-Regular,HelveticaNeue-Light,'Helvetica Neue Light','Microsoft YaHei',sans-serif,"宋体";;
+}
+.navbar{
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 0px;
+}
+.navtab a{
+    color: white;
+}
+.channel{
+    background: #fff;
+    border-radius: 7px;
+    padding: 20px;
+    margin-top: 20px;
+}
+.newsList span{
+    color: #999;
+}
+
+.line{
+    margin-bottom: 10px;
+}
+
+.footer{
+    color: #999;
+    letter-spacing: 1px;
+    line-height: 23px;
+}

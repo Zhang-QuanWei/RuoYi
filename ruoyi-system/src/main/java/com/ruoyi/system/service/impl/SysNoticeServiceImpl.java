@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,5 +79,26 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     public int deleteNoticeByIds(String ids)
     {
         return noticeMapper.deleteNoticeByIds(Convert.toStrArray(ids));
+    }
+
+    /**
+     * 查询3条最新通知
+     * @param notice
+     * @return
+     */
+    @Override
+    public List<SysNotice> selectNewList(SysNotice notice) {
+
+        List<SysNotice> noticeList = noticeMapper.selectListOrderCreateTime(notice);
+        List<SysNotice> newList = new ArrayList<>();
+        if (noticeList.size() < 3){
+            return noticeList;
+        }
+        for (int i=0;i<3;i++){
+            newList.add(noticeList.get(i));
+        }
+        return newList;
+
+
     }
 }

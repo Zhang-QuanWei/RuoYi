@@ -73,14 +73,25 @@ spring:
       # 热部署开关
       enabled: true
 
-# MyBatis
-mybatis:
-    # 搜索指定包别名
-    typeAliasesPackage: com.ruoyi.**.domain
-    # 配置mapper的扫描，找到所有的mapper.xml映射文件
-    mapperLocations: classpath*:mapper/**/*Mapper.xml
-    # 加载全局的配置文件
-    configLocation: classpath:mybatis/mybatis-config.xml
+## MyBatis
+#mybatis:
+#    # 搜索指定包别名
+#    typeAliasesPackage: com.ruoyi.**.domain
+#    # 配置mapper的扫描，找到所有的mapper.xml映射文件
+#    mapperLocations: classpath*:mapper/**/*Mapper.xml
+#    # 加载全局的配置文件
+#    configLocation: classpath:mybatis/mybatis-config.xml
+
+# MyBatis Plus配置
+mybatis-plus:
+  # 搜索指定包别名
+  typeAliasesPackage: com.ruoyi.**.domain
+  # 配置mapper的扫描，找到所有的mapper.xml映射文件
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+  # 加载全局的配置文件
+  configLocation: classpath:mybatis/mybatis-config.xml
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # PageHelper分页插件
 pagehelper: 
@@ -92,13 +103,13 @@ pagehelper:
 shiro:
   user:
     # 登录地址
-    loginUrl: /login
+    loginUrl: /front/index/login
     # 权限认证失败地址
     unauthorizedUrl: /unauth
     # 首页地址
     indexUrl: /index
     # 验证码开关
-    captchaEnabled: true
+    captchaEnabled: false
     # 验证码类型 math 数组计算 char 字符
     captchaType: math
   cookie:

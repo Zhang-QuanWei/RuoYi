@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('登录')"/>
+    <style>
+        .login-form-class{
+            margin-left: 100px;
+            padding-left: 50px;
+            padding-right: 50px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            height: 350px;
+            border-radius: 10px;
+            box-shadow: darkgrey 10px 10px 30px 5px;
+        }
+
+        .input-group{
+            margin-bottom: 10px;
+        }
+
+        em{
+            color: gray;
+        }
+
+        .footer{
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 页头 -->
+    <div class="container">
+        <a th:href="@{/front/index}">
+            <img th:src="@{/../../img/logo.png}" alt="logo" width="218px" style="margin-top: 22px;">
+        </a>
+    </div>
+    <hr>
+
+    <!-- 内容区 -->
+    <div class="container">
+
+        <!-- 间隔 -->
+        <div class="row" style="margin-top: 90px;"></div>
+
+
+        <div class="row">
+
+            <!-- 背景图 -->
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <img th:src="@{/../../img/loginBg.jpg}" alt="背景">
+            </div>
+            <!-- 登录表单 -->
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <div class="login-form-class">
+                    <h2>用户登录</h2>
+                    <hr>
+                    <form id="login-form">
+                        <div class="input-group">
+                            <span class="input-group-addon "><em class="glyphicon glyphicon-user"></em></span>
+                            <input id="username" name="username" type="text" class="form-control" placeholder="用户名">
+                        </div>
+
+                        <div class="input-group">
+                            <span class="input-group-addon "><em class="glyphicon glyphicon-lock"></em></span>
+                            <input id="password" name="password" type="password" class="form-control" placeholder="密码">
+                        </div>
+                    </form>
+
+
+                    <div class="login-common">
+                        <p class="text-right"><a th:href="@{/front/index/register}">注册</a></p>
+                        <button class="btn btn-warning btn-block" onclick="submitHandler()">登录</button>
+                    </div>
+
+                    <hr>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- 尾部标签页 -->
+    <div class="footer">
+        <p class="text-center">基于SpringBoot的网文阅读网的设计与实现 | create by @zqw | 联系方式：goodzhang888@163.com</p>
+    </div>
+
+    <th:block th:include="include :: footer" />
+
+    <script th:inline="javascript">
+
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#login-form").validate({
+            onkeyup: false,
+            rules: {
+                username: {
+                    required: true
+                },
+                password: {
+                    required: true
+                }
+            },
+            messages: {
+                username: {
+                    required: icon + "请输入您的用户名",
+                },
+                password: {
+                    required: icon + "请输入您的密码",
+                }
+            }
+        });
+
+        function submitHandler() {
+
+                if ($.validate.form()){
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/login",
+                        data: {
+                            "username": $("#username").val(),
+                            "password": $("#password").val(),
+                            "validateCode": null,
+                            "rememberMe": true
+                        },
+                        success: function(r) {
+                            if (r.code == web_status.SUCCESS) {
+                                //跳转前台首页
+                                location.href = ctx + "front/index";
+                            } else {
+
+                                $.modal.msg(r.msg);
+                            }
+                        }
+                    });
+
+                }
+
+            }
+
+
+    </script>
+</body>
+</html>

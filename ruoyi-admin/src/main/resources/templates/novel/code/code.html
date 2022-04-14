@@ -1,31 +1,27 @@
 <!DOCTYPE html>
-<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('邀请码列表')" />
 </head>
 <body class="gray-bg">
-     <div class="container-div">
+    <div class="container-div">
         <div class="row">
+            <!-- 搜索工具栏 -->
             <div class="col-sm-12 search-collapse">
-                <form id="formId">
+                <form id="post-form">
                     <div class="select-list">
                         <ul>
                             <li>
-                                <label>创建人：</label>
-                                <input type="text" name="createUserName"/>
-                            </li>
-                            <li class="select-time">
-                                <label>有效时间：</label>
-                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginValidityTime]"/>
-                                <span>-</span>
-                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endValidityTime]"/>
+                                邀请码：<input type="text" name="inviteCode"/>
                             </li>
                             <li>
-                                <label>使用状态：</label>
-                                <select name="isUse" th:with="type=${@dict.getType('code_is_use')}">
-                                    <option value="">所有</option>
-                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
-                                </select>
+                                创建人：<input type="text" name="createUser"/>
+                            </li>
+                            <li>
+                                使用状态：<select name="isUse" th:with="type=${@dict.getType('author_code_use')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
                             </li>
                             <li>
                                 <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
@@ -36,20 +32,16 @@
                 </form>
             </div>
 
+            <!-- 按钮工具栏 -->
             <div class="btn-group-sm" id="toolbar" role="group">
-                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="novel:code:add">
-                    <i class="fa fa-plus"></i> 添加
+                <a class="btn btn-success" onclick="$.operate.add()">
+                    <i class="fa fa-plus"></i> 新增
                 </a>
-                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="novel:code:edit">
-                    <i class="fa fa-edit"></i> 修改
-                </a>
-                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="novel:code:remove">
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()">
                     <i class="fa fa-remove"></i> 删除
                 </a>
-                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="novel:code:export">
-                    <i class="fa fa-download"></i> 导出
-                </a>
             </div>
+
             <div class="col-sm-12 select-table table-striped">
                 <table id="bootstrap-table"></table>
             </div>
@@ -57,60 +49,52 @@
     </div>
     <th:block th:include="include :: footer" />
     <script th:inline="javascript">
-        var editFlag = [[${@permission.hasPermi('novel:code:edit')}]];
-        var removeFlag = [[${@permission.hasPermi('novel:code:remove')}]];
-        var isUseDatas = [[${@dict.getType('code_is_use')}]];
+        // var editFlag = [[${@permission.hasPermi('system:post:edit')}]];
+        // var removeFlag = [[${@permission.hasPermi('system:post:remove')}]];
+        var datas = [[${@dict.getType('author_code_use')}]];
         var prefix = ctx + "novel/code";
 
         $(function() {
             var options = {
                 url: prefix + "/list",
                 createUrl: prefix + "/add",
-                updateUrl: prefix + "/edit/{id}",
                 removeUrl: prefix + "/remove",
-                exportUrl: prefix + "/export",
                 modalName: "邀请码",
                 columns: [{
                     checkbox: true
                 },
-                {
-                    field: 'id',
-                    title: '主键',
-                    visible: false
-                },
-                {
-                    field: 'createUserName',
-                    title: '创建人'
-                },
-                {
-                    field: 'code',
-                    title: '邀请码内容'
-                },
-                {
-                    field: 'validityTime',
-                    title: '有效时间'
-                },
-                {
-                    field: 'createTime',
-                    title: '创建时间'
-                },
-                {
-                    field: 'isUse',
-                    title: '使用状态',
-                    formatter: function(value, row, index) {
-                       return $.table.selectDictLabel(isUseDatas, value);
-                    }
-                },
-                {
-                    title: '操作',
-                    align: 'center',
-                    formatter: function(value, row, index) {
-                        var actions = [];
-                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
-                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
-                        return actions.join('');
-                    }
-                }]
+                    {
+                        field: 'id',
+                        title: '邀请码编号',
+                        visible: false
+                    },
+                    {
+                        field: 'inviteCode',
+                        title: '邀请码内容'
+                    },{
+                        field: 'isUse',
+                        title: '使用状态',
+                        formatter: function(value, row, index) {
+                            return $.table.selectDictLabel(datas, value);
+                        }
+                    },
+                    {
+                        field: 'createUser',
+                        title: '创建人'
+                    },
+                    {
+                        field: 'createTime',
+                        title: '创建时间'
+                    },
+                    {
+                        title: '操作',
+                        align: 'center',
+                        formatter: function(value, row, index) {
+                            var actions = [];
+                            actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                            return actions.join('');
+                        }
+                    }]
             };
             $.table.init(options);
         });

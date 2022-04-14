@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.novel.mapper.BookChapterMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.novel.domain.BookChapter">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="bookId" column="book_id" jdbcType="BIGINT"/>
+            <result property="chapterId" column="chapter_id" jdbcType="BIGINT"/>
+            <result property="chapterIndex" column="chapter_index" jdbcType="INTEGER"/>
+            <result property="chapterTitle" column="chapter_title" jdbcType="VARCHAR"/>
+            <result property="chapterWord" column="chapter_word" jdbcType="INTEGER"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="checkStatus" column="check_status" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,book_id,chapter_id,
+        chapter_index,chapter_title,chapter_word,
+        update_time,check_status
+    </sql>
+
+    <!--  查询bookChapter集合  -->
+    <select id="selectBookChapterList" resultType="com.ruoyi.novel.domain.BookChapter">
+        select
+        <include refid="Base_Column_List"/>
+        from book_chapter
+        <where>
+            <if test="chapterTitle != null and chapterTitle != ''">
+                AND chapter_title like concat('%', #{chapterTitle}, '%')
+            </if>
+            <if test="checkStatus != null">
+                AND check_status = #{checkStatus}
+            </if>
+            AND book_id = #{bookId}
+        </where>
+    </select>
+
+    <select id="selectMaxChapterIndexByBookId" resultType="Integer">
+        select max(chapter_index)
+        from book_chapter
+        where book_id = #{bookId}
+    </select>
+
+</mapper>

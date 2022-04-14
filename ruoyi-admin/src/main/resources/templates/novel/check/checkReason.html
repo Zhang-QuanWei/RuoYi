@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+
+    <th:block th:include="include :: header('改正建议')" />
+
+</head>
+<body>
+
+    <div class="col-md-12">
+        <div class="form-group">
+            <hr>
+            <form id="check-form">
+                <div class="col-sm-9">
+                    <textarea id="checkOpinion" type="text" name="checkOpinion" class="form-control" placeholder="请输入审核意见" rows="9" required></textarea>
+                </div>
+                <input type="hidden" id="bookId" name="bookId" th:value="${bookId}"/>
+                <input type="hidden" id="bookName" name="bookName" th:value="${bookName}"/>
+            </form>
+        </div>
+
+    </div>
+
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+        var prefix = ctx + "novel/bookCheck";
+
+        $("#check-form").validate();
+
+        function submitHandler(){
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/checkOpinion",$('#check-form').serialize());
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+
+    <th:block th:include="include :: header('审核列表')" />
+
+</head>
+<body>
+
+    <div class="container-div">
+
+        <div class="row">
+
+            <div class="col-sm-12 search-collapse">
+                <form id="role-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                小说名称：<input type="text" name="bookName"/>
+                            </li>
+                            <li>
+                                小说分类：<select name="bookCategory" th:with="type=${@dict.getType('book_category')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                            </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <!--<div class="btn-group-sm" id="toolbar" role="group">-->
+            <!--    <a class="btn btn-primary multiple disabled" onclick="$.operate.edit()" shiro:hasPermission="novel:book:edit">-->
+            <!--        <i class="glyphicon glyphicon-ok"></i> 审核通过-->
+            <!--    </a>-->
+            <!--    <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="novel:book:remove">-->
+            <!--        <i class="fa fa-remove"></i> 审核不通过-->
+            <!--    </a>-->
+            <!--</div>-->
+
+            <div class="col-sm-12 select-table table-striped">
+                <!--    设置用户ID隐藏域        -->
+                <!--<input type="hidden" id="userId" th:value="${userId}" />-->
+                <table id="bootstrap-table"></table>
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <th:block th:include="include :: footer" />
+
+
+    <script th:inline="javascript">
+
+        var prefix = ctx + "novel/bookCheck";
+
+        // 审核状态字典数据
+        var checkDatas = [[${@dict.getType('book_check_status')}]];
+        // 获取数据字典数据
+        var categoryDatas = [[${@dict.getType('book_category')}]];
+
+        function openBookDetail(bookName,id) {
+            var url = prefix + "/bookChapterCheck/"+id;
+            $.modal.openTab(bookName,url);
+        }
+
+        //提交审核结果
+        function check(id,bookName,result) {
+            if (result == "success"){
+                $.modal.confirm("确定提交审核结果吗？",function () {
+                    //打开遮罩层
+                    $.modal.loading("正在提交信息，请稍后...");
+                    checkStatus = 1;
+                    $.operate.post(prefix + "/check",{
+                        id:id,
+                        checkStatus:checkStatus
+                    },function (result) {
+                        // 关闭遮罩层信息
+                        $.modal.closeLoading();
+                    });
+                });
+
+            }else if (result == "error"){
+                checkStatus = 2;
+                $.modal.open("改正建议",prefix + "/form/?bookId="+id+"&&bookName="+bookName,600,320);
+            }
+
+        }
+
+
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                modalName: "审核",
+                columns: [{
+                    checkbox: true
+                },{
+                    field: 'id',
+                    title: '小说ID',
+                    visible:false
+                },{
+                    field: 'bookName',
+                    title: '小说名称'
+                },{
+                    field: 'bookCategory',
+                    title: '小说分类',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(categoryDatas, value);
+                    }
+                },{
+                    field: 'picUrl',
+                    title: '小说封面',
+                    formatter:function (value,row,index)
+                    {
+                        return "<img  src='"+value+"' width='95' height='126' class='img-rounded' >";
+                    }
+                },{
+                    field: 'bookIntro',
+                    title: '作品简介'
+                },{
+                    field: 'authorSpeak',
+                    title: '作者有话说'
+                },{
+                    field: 'updateTime',
+                    title: '更新时间'
+                },{
+                    field: 'createTime',
+                    title: '创建时间'
+                },{
+                    field: 'checkStatus',
+                    title: '审核状态',
+                    // 格式化数据字典
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(checkDatas, value);
+                    }
+                },{
+                    title: '操作',
+                    align: 'center',
+                    width: 250,
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="openBookDetail(\''+ row.bookName + '\',\'' + row.id + '\')"><i class="glyphicon glyphicon-th-list"></i>章节审核</a> ');
+                        actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="check(\''+ row.id + '\',\'' + row.bookName + '\',\'success\')"><i class="glyphicon glyphicon-ok"></i>通过</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="check(\''+ row.id + '\',\'' + row.bookName + '\',\'error\')"><i class="glyphicon glyphicon-remove"></i>不通过</a> ');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+    </script>
+</body>
+</html>

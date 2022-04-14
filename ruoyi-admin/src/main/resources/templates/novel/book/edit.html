@@ -1,88 +1,146 @@
 <!DOCTYPE html>
-<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: header('修改小说')" />
+    <!--  文件上传  -->
     <th:block th:include="include :: bootstrap-fileinput-css"/>
+
+    <th:block th:include="include :: bootstrap-select-css" />
+
 </head>
-<body class="white-bg">
+<body  class="white-bg">
+
     <div class="wrapper wrapper-content animated fadeInRight ibox-content">
-        <form class="form-horizontal m" id="form-book-edit" th:object="${book}">
-            <input name="id" th:field="*{id}" type="hidden">
-            <div class="form-group">    
-                <label class="col-sm-3 control-label is-required">小说名称：</label>
-                <div class="col-sm-8">
-                    <input name="bookName" th:field="*{bookName}" class="form-control" type="text" required>
-                </div>
+
+    <form class="form-horizontal m" id="form-book-edit" th:object="${book}">
+        <input id="bookId" name="bookId" type="hidden" th:field="*{id}"/>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">小说名称：</label>
+            <div class="col-sm-9">
+                <input type="text" id="bookName" name="bookName" class="form-control" placeholder="请输入小说名称" th:field="*{bookName}" required>
             </div>
-            <div class="form-group">    
-                <label class="col-sm-3 control-label is-required">小说分类：</label>
-                <div class="col-sm-8">
-                    <select name="bookCategory" class="form-control m-b" th:with="type=${@dict.getType('book_category')}" required>
-                        <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}" th:field="*{bookCategory}"></option>
-                    </select>
-                </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">小说分类：</label>
+            <div class="col-sm-9">
+                <select class="selectpicker" name="bookCategory" th:with="type=${@dict.getType('book_category')}">
+                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"  th:field="*{bookCategory}" >
+                    </option>
+                </select>
             </div>
-            <div class="form-group">    
-                <label class="col-sm-3 control-label">小说封面：</label>
-                <div class="col-sm-8">
-                    <input type="hidden" name="picUrl" th:field="*{picUrl}">
-                    <div class="file-loading">
-                        <input class="form-control file-upload" id="picUrl" name="file" type="file">
-                    </div>
-                </div>
+        </div>
+        <div class="form-group" >
+            <label class="col-sm-3 control-label">小说封面：</label>
+            <div class="col-sm-9">
+                <input id="fileInput" name="file" type="file">
+                <!--  构建封面隐藏域  -->
+                <input type="hidden" id="picUrl" name="picUrl" class="form-control" th:field="*{picUrl}">
             </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label is-required">作品简介：</label>
-                <div class="col-sm-8">
-                    <textarea name="bookIntro" class="form-control" required>[[*{bookIntro}]]</textarea>
-                </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">作品简介：</label>
+            <div class="col-sm-9">
+                <textarea type="text" id="bookIntro" name="bookIntro" class="form-control" placeholder="请输入小说简介" th:field="*{bookIntro}" required></textarea>
             </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">作者有话说：</label>
-                <div class="col-sm-8">
-                    <textarea name="authorSpeak" class="form-control">[[*{authorSpeak}]]</textarea>
-                </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">作者有话说：</label>
+            <div class="col-sm-9">
+                <textarea type="text" id="authorSpeak" name="authorSpeak" class="form-control" placeholder="默认：新作出品，希望大家支持欧！！！" th:field="*{authorSpeak}"></textarea>
             </div>
-            <div class="form-group">    
-                <label class="col-sm-3 control-label">完结状态：</label>
-                <div class="col-sm-8">
-                    <div class="radio-box" th:each="dict : ${@dict.getType('book_book_status')}">
-                        <input type="radio" th:id="${'bookStatus_' + dict.dictCode}" name="bookStatus" th:value="${dict.dictValue}" th:field="*{bookStatus}">
-                        <label th:for="${'bookStatus_' + dict.dictCode}" th:text="${dict.dictLabel}"></label>
-                    </div>
-                </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">小说状态：</label>
+            <div class="col-sm-9">
+                <select class="selectpicker" name="bookStatus" th:with="type=${@dict.getType('book_book_status')}">
+                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"  th:field="*{bookStatus}" >
+                    </option>
+                </select>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
+
+</div>
+
+
+
     <th:block th:include="include :: footer" />
+    <!--  文件上传  -->
     <th:block th:include="include :: bootstrap-fileinput-js"/>
-    <script th:inline="javascript">
+    <!--  下拉框  -->
+    <th:block th:include="include :: bootstrap-select-js" />
+    <script type="text/javascript">
+
         var prefix = ctx + "novel/book";
-        $("#form-book-edit").validate({
-            focusCleanup: true
+
+        var icon = "<i class='fa fa-times-circle'></i> ";
+
+        var imgPicUrl =  $("#picUrl").val();
+
+        console.log(imgPicUrl);
+
+
+        //首先进行表单校验
+        $("#form-book-add").validate({
+            rules: {
+                bookName: {
+                    required:true,
+                    maxlength:20
+                },
+                bookIntro: {
+                    required:true,
+                    rangelength:[50,100]
+                }
+            },
+            messages: {
+                bookName: {
+                    required:icon + "请输入小说名！",
+                    maxlength: icon + "最多输入20个字符"
+                },
+                bookIntro: {
+                    required:icon + "请输入作品简介！",
+                    rangelength:icon + "简介字数要求在50-100字之间"
+                }
+            }
         });
 
+        // 然后加载单图上传
+        $("#fileInput").fileinput({
+            uploadUrl: ctx + 'common/upload',
+            maxFileCount: 1,
+            autoReplace: true,
+            width:95,
+            height:126,
+            initialPreview: [
+                "<img src='"+ imgPicUrl +"' class='file-preview-image'>"
+            ],
+            initialPreviewAsData: true,
+            initialPreviewConfig: [{
+                previewAsData: false,
+                size: 81920,
+                caption: "default.jpg",
+                key: 13
+            }]
+        }).on('fileuploaded', function (event, data, previewId, index) {
+            //上传成功之后的处理方法
+            var rsp = data.response;
+            $("#picUrl").val(rsp.fileName);
+            // $("input[name='" + event.currentTarget.id + "']").val(picUrl)
+            log.info("return url：" + rsp.url)
+            log.info("reutrn fileName：" + rsp.fileName)
+            log.info("reutrn newFileName：" + rsp.newFileName)
+            log.info("return originalFilename：" + rsp.originalFilename)
+        }).on('fileremoved', function (event, id, index) {
+            $("input[name='" + event.currentTarget.id + "']").val('')
+        })
+
+        //最后进行ajax提交
         function submitHandler() {
             if ($.validate.form()) {
                 $.operate.save(prefix + "/edit", $('#form-book-edit').serialize());
             }
         }
 
-        $(".file-upload").each(function (i) {
-            var val = $("input[name='" + this.id + "']").val()
-            $(this).fileinput({
-                'uploadUrl': ctx + 'common/upload',
-                initialPreviewAsData: true,
-                initialPreview: [val],
-                maxFileCount: 1,
-                autoReplace: true
-            }).on('fileuploaded', function (event, data, previewId, index) {
-                $("input[name='" + event.currentTarget.id + "']").val(data.response.url)
-            }).on('fileremoved', function (event, id, index) {
-                $("input[name='" + event.currentTarget.id + "']").val('')
-            })
-            $(this).fileinput('_initFileActions');
-        });
     </script>
 </body>
 </html>

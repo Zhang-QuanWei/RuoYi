@@ -1,107 +1,290 @@
 package com.ruoyi.novel.service.impl;
 
-import java.util.List;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ruoyi.common.core.text.Convert;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.ruoyi.novel.mapper.BookMapper;
 import com.ruoyi.novel.domain.Book;
-import com.ruoyi.novel.service.IBookService;
-import com.ruoyi.common.core.text.Convert;
+import com.ruoyi.novel.domain.BookChapter;
+import com.ruoyi.novel.domain.BookComment;
+import com.ruoyi.novel.mapper.BookChapterMapper;
+import com.ruoyi.novel.mapper.BookCommentMapper;
+import com.ruoyi.novel.mapper.ChapterContentMapper;
+import com.ruoyi.novel.service.BookService;
+import com.ruoyi.novel.mapper.BookMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * 小说Service业务层处理
- * 
- * @author zqw
- * @date 2022-03-06
- */
+* @author 64829
+* @description 针对表【book】的数据库操作Service实现
+* @createDate 2022-03-15 00:56:31
+*/
 @Service
-public class BookServiceImpl implements IBookService 
-{
-    @Autowired
+public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
+    implements BookService{
+
+    @Resource
     private BookMapper bookMapper;
 
+    @Resource
+    private BookChapterMapper bookChapterMapper;
+
+    @Resource
+    private ChapterContentMapper chapterContentMapper;
+
     /**
-     * 查询小说
-     * 
-     * @param id 小说主键
-     * @return 小说
+     * 查询所有小说信息（可附带条件）
+     * @param book
+     * @return
      */
-    @Override
-    public Book selectBookById(Long id)
-    {
-        return bookMapper.selectBookById(id);
+    public List<Book> selectBookList(Book book){
+
+        List<Book> bookList = bookMapper.selectBookList(book);
+
+        return bookList;
     }
 
     /**
-     * 查询小说列表
-     * 
-     * @param book 小说
-     * @return 小说
+     * 添加新小说
+     * @param book
+     * @return
      */
-    @Override
-    public List<Book> selectBookList(Book book)
-    {
-        return bookMapper.selectBookList(book);
-    }
-
-    /**
-     * 新增小说
-     * 
-     * @param book 小说
-     * @return 结果
-     */
-    @Override
-    public int insertBook(Book book)
-    {
-        //默认封面
-
-        //作者有话说
+    @Transactional(propagation = Propagation.REQUIRED)  //增删改加事务注解
+    public boolean insertNewBook(Book book) {
         if (StringUtils.isEmpty(book.getAuthorSpeak())){
-            book.setAuthorSpeak("亲亲们，你们的支持是我最大的动力！求点击、求推荐、求书评哦！");
+            book.setAuthorSpeak("新作出品，希望大家支持欧！！！");
         }
-        //创建时间
-        book.setCteateTime(DateUtils.parseDate(DateUtils.getTime()));
-        //更新时间
+
+        //设置创建时间
+        book.setCreateTime(DateUtils.parseDate(DateUtils.getTime()));
+        //设置更新时间
         book.setUpdateTime(DateUtils.parseDate(DateUtils.getTime()));
-        return bookMapper.insertBook(book);
+
+        //设置默认封面
+        if (StringUtils.isEmpty(book.getPicUrl())){
+            book.setPicUrl("/profile/upload/2022/03/16/default-cover_20220316154010A001.png");
+        }
+
+        int rows = bookMapper.insert(book);
+
+        if (rows != 1){
+            //抛出增加小说异常
+            System.out.println("增加小说异常！");
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * 修改小说
-     * 
-     * @param book 小说
-     * @return 结果
+     * 通过bookId查询book
+     * @param bookId
+     * @return
      */
-    @Override
-    public int updateBook(Book book)
-    {
-        book.setUpdateTime(DateUtils.getNowDate());
-        return bookMapper.updateBook(book);
+    public Book selectBookByBookId(Long bookId) {
+
+        Book book = bookMapper.selectById(bookId);
+
+        return book;
+
     }
 
     /**
-     * 批量删除小说
-     * 
-     * @param ids 需要删除的小说主键
-     * @return 结果
+     * 根据小说id与最大章节索引查询当前小说的最新章节标题
+     * @param id
+     * @param maxChapterIndex
+     * @return
      */
-    @Override
-    public int deleteBookByIds(String ids)
-    {
-        return bookMapper.deleteBookByIds(Convert.toStrArray(ids));
+    public String getlastChapterTitle(Long id, Integer maxChapterIndex) {
+        QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("book_id",id).eq("chapter_index",maxChapterIndex);
+        BookChapter bookChapter = bookChapterMapper.selectOne(queryWrapper);
+        return bookChapter.getChapterTitle();
     }
 
     /**
-     * 删除小说信息
-     * 
-     * @param id 小说主键
-     * @return 结果
+     * 通过id删除小说
+     * @param ids
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED)  //增删改加事务注解
+    public int deleteBookByIds(String ids) {
+
+        Long[] bookIds = Convert.toLongArray(ids);
+        int bookCount = 0;  //记录删除的书本数量
+
+        for (Long bookId : bookIds)
+        {
+            //1. 根据bookId找到chapterID集合，进而删除该本书所有章节
+            QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+            queryWrapper.select("chapter_id").eq("book_id",bookId);
+            List<Object> chapterIdList = bookChapterMapper.selectObjs(queryWrapper);
+            //将List<Object>转为List<Long>
+            List<Long> list = new ArrayList<>();
+            for (Object id : chapterIdList) {
+                Long lid = Long.valueOf(String.valueOf(id));
+                list.add(lid);
+            }
+            System.out.println(list);
+            //若当前书籍尚未添加章节，则无需删除目录与章节信息
+            if (!list.isEmpty()){
+
+                //1.1 删除该本书所有章节
+                int ContentResult = chapterContentMapper.deleteBatchIds(list);
+
+                //2. 根据bookID删除该本书所有目录信息
+                QueryWrapper<BookChapter> deleteWrapper = new QueryWrapper<>();
+                deleteWrapper.eq("book_id",bookId);
+                int ChapterResult = bookChapterMapper.delete(deleteWrapper);
+
+                if (ContentResult < 1){
+                    System.out.println("bookId为"+bookId+"的书章节删除出错!");
+                } else if (ChapterResult < 1){
+                    System.out.println("bookId为"+bookId+"的书目录信息删除出错!");
+                }
+            }
+
+            //3. 根据bookID删除该本书的信息
+            int bookResult = bookMapper.deleteById(bookId);
+
+            if (bookResult > 0){
+                //删除成功，记录删除的书本数量
+                bookCount++;
+            }
+        }
+
+        if (bookCount != bookIds.length){
+            System.out.println("小说删除出现错误,有信息删除失败！");
+        }
+
+        return bookCount;
+
+    }
+
+    /**
+     * 分页查询小说
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    public PageInfo<Book> getBookList(int pageNum, int pageSize,Book book) {
+
+        PageHelper.startPage(pageNum,pageSize);
+        List<Book> bookList = bookMapper.selectBookList(book);
+        PageInfo<Book> pageInfo = new PageInfo<>(bookList);
+
+        return pageInfo;
+
+    }
+
+    /**
+     * 查询待审核小说
+     * @return
+     */
+    public List<Book> selectCheckBook(Book book) {
+        //TODO 查询方式待更正，需要保证章节审核完毕后页面才不显示该小说，否则即使小说审核完毕，章节未审核完毕的话，页面依旧显示该小说
+        book.setCheckStatus(0);
+
+        List<Book> bookList = bookMapper.selectBookList(book);
+
+        return bookList;
+    }
+
+    /**
+     * 查询当前小说的最新章节
+     * @param id
+     * @param maxChapterIndex
+     * @return
+     */
+    public BookChapter getlastChapter(Long id, Integer maxChapterIndex) {
+        QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("book_id",id).eq("chapter_index",maxChapterIndex);
+        BookChapter bookChapter = bookChapterMapper.selectOne(queryWrapper);
+        return bookChapter;
+    }
+
+    /**
+     * 爬取单本小说增添入库
+     * @param book
+     * @return
+     */
+    public Long spiderInsertOneBook(Book book) {
+        book.setAuthorSpeak("新作出品，希望大家支持欧！！！");
+        //设置创建时间
+        book.setCreateTime(DateUtils.parseDate(DateUtils.getTime()));
+        //设置审核状态为审核通过
+        book.setCheckStatus(1);
+        int rows = bookMapper.insert(book);
+        if (rows != 1){
+            throw new ServiceException("小说 "+book.getBookName()+" 入库失败！");
+        }
+        return book.getId();
+    }
+
+    /**
+     * 根据小说名称查询是否有重名小说存在
+     * @param bookName
+     * @return
+     */
+    public Boolean selectBookByBookName(String bookName) {
+        QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("book_name",bookName);
+        Book book = bookMapper.selectOne(queryWrapper);
+        if (StringUtils.isNull(book)){
+            return false;
+        }else {
+            return true;
+        }
+    }
+
+    /**
+     * 根据条件查询书籍排行榜
+     * @param queryItem
+     * @return
+     */
+    public PageInfo<Book> selectBookListOrderByItem(Integer queryItem,int pageNum, int pageSize) {
+        //0:点击榜、1:订阅榜、2:更新榜
+        QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByAsc(queryItem == 0,"visit_count").orderByAsc(queryItem == 1,"subs_num").orderByDesc(queryItem == 2,"update_time");
+
+        PageHelper.startPage(pageNum,pageSize);
+        List<Book> bookList = bookMapper.selectList(queryWrapper);
+        PageInfo<Book> pageInfo = new PageInfo<>(bookList);
+
+        return pageInfo;
+    }
+
+    /**
+     * 查询点击量最高的5本书籍
+     * @param book
+     * @return
      */
     @Override
-    public int deleteBookById(Long id)
-    {
-        return bookMapper.deleteBookById(id);
+    public List<Book> selectNewList(Book book) {
+        QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByDesc(true,"visit_count");
+        List<Book> bookList = bookMapper.selectList(queryWrapper);
+        List<Book> newList = new ArrayList<>();
+
+        for (int i=0;i<5;i++){
+            newList.add(bookList.get(i));
+        }
+
+        return newList;
     }
 }
+
+
+
+

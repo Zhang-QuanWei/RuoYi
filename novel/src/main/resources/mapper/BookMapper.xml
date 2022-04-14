@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.novel.mapper.BookMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.novel.domain.Book">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="authorId" column="author_id" jdbcType="BIGINT"/>
+            <result property="authorName" column="author_name" jdbcType="VARCHAR"/>
+            <result property="bookName" column="book_name" jdbcType="VARCHAR"/>
+            <result property="bookCategory" column="book_category" jdbcType="VARCHAR"/>
+            <result property="picUrl" column="pic_url" jdbcType="VARCHAR"/>
+            <result property="bookIntro" column="book_intro" jdbcType="VARCHAR"/>
+            <result property="authorSpeak" column="author_speak" jdbcType="VARCHAR"/>
+            <result property="bookWord" column="book_word" jdbcType="INTEGER"/>
+            <result property="subsNum" column="subs_num" jdbcType="INTEGER"/>
+            <result property="visitCount" column="visit_count" jdbcType="BIGINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="lastChapterId" column="last_chapter_id" jdbcType="BIGINT"/>
+            <result property="lastChapterTitle" column="last_chapter_title" jdbcType="VARCHAR"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="checkStatus" column="check_status" jdbcType="TINYINT"/>
+            <result property="bookStatus" column="book_status" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,author_id,author_name,
+        book_name,book_category,pic_url,
+        book_intro,author_speak,book_word,
+        subs_num,visit_count,create_time,
+        last_chapter_id,last_chapter_title,update_time,
+        check_status,book_status
+    </sql>
+
+    <!--  查询book集合  -->
+    <select id="selectBookList" resultType="com.ruoyi.novel.domain.Book">
+        select
+        <include refid="Base_Column_List"/>
+        from book
+        <where>
+            <if test="bookName != null and bookName != ''">
+                AND book_name like concat('%', #{bookName}, '%')
+            </if>
+            <if test="authorName != null and authorName != ''">
+                AND author_name like concat('%', #{authorName}, '%')
+            </if>
+            <if test="bookCategory != null and bookCategory != ''">
+                AND book_category like concat('%', #{bookCategory}, '%')
+            </if>
+            <if test="checkStatus != null">
+                AND check_status = #{checkStatus}
+            </if>
+            <if test="authorId != null">
+                AND author_id = #{authorId}
+            </if>
+        </where>
+
+    </select>
+
+
+
+</mapper>
