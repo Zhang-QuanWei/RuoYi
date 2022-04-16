@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.novel.mapper.ReportMapper">
+
+    <resultMap id="BaseResultMap" type="com.ruoyi.novel.domain.Report">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="bookId" column="book_id" jdbcType="BIGINT"/>
+            <result property="bookName" column="book_name" jdbcType="VARCHAR"/>
+            <result property="authorName" column="author_name" jdbcType="VARCHAR"/>
+            <result property="reportType" column="report_type" jdbcType="TINYINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="solveStatus" column="solve_status" jdbcType="TINYINT"/>
+            <result property="note" column="note" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,book_id,book_name,
+        author_name,report_type,create_time,
+        solve_status,note
+    </sql>
+</mapper>

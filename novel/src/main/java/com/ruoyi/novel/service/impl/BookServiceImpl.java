@@ -273,15 +273,37 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
     @Override
     public List<Book> selectNewList(Book book) {
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc(true,"visit_count");
+        queryWrapper.orderByDesc("visit_count").last("limit 5");
         List<Book> bookList = bookMapper.selectList(queryWrapper);
-        List<Book> newList = new ArrayList<>();
 
-        for (int i=0;i<5;i++){
-            newList.add(bookList.get(i));
-        }
+        return bookList;
+    }
 
-        return newList;
+    /**
+     * 查询同类型书籍点击量最高的10本书
+     * @param bookCategory
+     * @return
+     */
+    public List<Book> selectBookListByBookCategory(String bookCategory) {
+        QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("book_category",bookCategory).orderByDesc("visit_count").last("limit 10");
+        List<Book> bookList = bookMapper.selectList(queryWrapper);
+
+        return bookList;
+    }
+
+    /**
+     * 设置书籍审核状态为待审核
+     * @param id
+     * @return
+     */
+    public Boolean updateBookCheck(Long id) {
+
+        //查询当前书籍
+        Book book = bookMapper.selectById(id);
+        book.setCheckStatus(2);
+        return bookMapper.updateById(book) > 0? true : false;
+
     }
 }
 

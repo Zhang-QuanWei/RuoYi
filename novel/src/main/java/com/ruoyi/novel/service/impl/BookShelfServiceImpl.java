@@ -79,6 +79,22 @@ public class BookShelfServiceImpl extends ServiceImpl<BookShelfMapper, BookShelf
 
         return true;
     }
+
+    /**
+     * 判断书籍是否在用户书架中
+     * @param userId
+     * @param bookId
+     * @return
+     */
+    @Override
+    public BookShelf isShelf(Long userId, Long bookId) {
+
+        QueryWrapper<BookShelf> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id",userId).eq("book_id",bookId);
+        BookShelf bookShelf = bookShelfMapper.selectOne(queryWrapper);
+
+        return bookShelf;
+    }
 }
 
 

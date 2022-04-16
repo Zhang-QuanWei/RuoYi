@@ -11,4 +11,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface BookShelfService extends IService<BookShelf> {
 
     Boolean delBookShelf(BookShelf bookShelf);
+
+    /**
+     * 判断书籍是否在用户书架中
+     * @param userId
+     * @param bookId
+     * @return
+     */
+    BookShelf isShelf(Long userId, Long bookId);
 }

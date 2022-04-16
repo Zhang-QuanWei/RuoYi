@@ -98,7 +98,6 @@ public class Book implements Serializable {
      */
     private String lastChapterTitle;
 
-
     /**
      * 更新时间
      */
