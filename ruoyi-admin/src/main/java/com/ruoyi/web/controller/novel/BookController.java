@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.novel.domain.Book;
@@ -176,7 +177,12 @@ public class BookController extends BaseController {
     @ResponseBody
     public AjaxResult editSave(@Validated Book book)
     {
+        if (book.getCheckStatus() == 2 || book.getCheckStatus() == 1){
+            //当前书籍为审核通过或不通过的书籍,修改为待审核状态
+            book.setCheckStatus(0);
+        }
 
+        book.setUpdateTime(DateUtils.parseDate(DateUtils.getTime()));
         boolean result = bookService.updateById(book);
 
         if (result){

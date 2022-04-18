@@ -8,8 +8,10 @@ import lombok.Data;
 @Data
 public class SearchDataVo {
 
-    String bookCategory;
+    Integer bookCategory;
     Integer bookStatus;
     Integer bookWord;
     String bookUpdate;
+    Integer orderByItem;
+    Integer timeItem;
 }

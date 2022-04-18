@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.novel;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -78,7 +79,6 @@ public class bookChapterController extends BaseController {
      * @return
      */
     //@RequiresPermissions("system:post:add")
-    @Log(title = "目录管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
     public AjaxResult add(@Validated BookChapter bookChapter){
@@ -122,13 +122,23 @@ public class bookChapterController extends BaseController {
      * @return
      */
     //@RequiresPermissions("system:post:add")
-    @Log(title = "章节管理", businessType = BusinessType.INSERT)
     @PostMapping("/addContent")
     @ResponseBody
     public AjaxResult addContent(ChapterContent chapterContent){
 
+        //章节内容是否包含敏感词
+        boolean isSenWords = SensitiveWordHelper.contains(chapterContent.getChapterContent());
+        //返回所有敏感词
+        List<String> wordList = SensitiveWordHelper.findAll(chapterContent.getChapterContent());
+        if (isSenWords){
+            return AjaxResult.error("章节内容包含敏感词："+wordList.toString());
+        }
+
         ChapterContent data = chapterContentService.insertNewChapter(chapterContent);
 
+        if (StringUtils.isNull(data)){
+            AjaxResult.error("插入章节内容信息失败！请重试！");
+        }
         //返回状态码与chapterContentid数据
         return AjaxResult.success(data);
     }
@@ -139,7 +149,6 @@ public class bookChapterController extends BaseController {
      * @return
      */
     //@RequiresPermissions("system:post:remove")
-    @Log(title = "目录管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
     public AjaxResult remove(String ids)
@@ -176,7 +185,6 @@ public class bookChapterController extends BaseController {
      * @return
      */
     //@RequiresPermissions("system:post:edit")
-    @Log(title = "目录管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
     public AjaxResult editSave(@Validated BookChapter bookChapter){
@@ -200,7 +208,6 @@ public class bookChapterController extends BaseController {
      * @return
      */
     //@RequiresPermissions("system:post:edit")
-    @Log(title = "章节管理", businessType = BusinessType.UPDATE)
     @PostMapping("/editContent")
     @ResponseBody
     public AjaxResult editSaveContent(ChapterContent chapterContent){

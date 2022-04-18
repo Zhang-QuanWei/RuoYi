@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: front_header('个人信息')"/>
 
@@ -64,7 +64,15 @@
                     <li role="presentation" class="active"><a th:href="@{/front/index}">首页</a></li>
                     <li role="presentation"><a th:href="@{/front/index/allWork}">全部作品</a></li>
                     <li role="presentation"><a th:href="@{/front/index/toRankList}">排行榜</a></li>
-                    <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                    <shiro:hasAnyRoles name="author,editor,administrator,admin">
+                        <li role="presentation"><a th:href="@{/index}">作家专区</a></li>
+                    </shiro:hasAnyRoles>
+                    <shiro:hasRole name="common">
+                        <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                    </shiro:hasRole>
+                    <shiro:notAuthenticated>
+                        <li role="presentation"><a th:href="@{/front/index/login}">作家专区</a></li>
+                    </shiro:notAuthenticated>
                 </ul>
             </div>
 
@@ -89,10 +97,10 @@
                         <span class="fa fa-book fa-fw"></span>
                         <a th:href="@{/front/index/toBookShelf}">我的书架</a>
                     </li>
-                    <li>
-                        <span class="fa fa-commenting fa-fw"></span>
-                        <a href="">我的书评</a>
-                    </li>
+                    <!--<li>-->
+                    <!--    <span class="fa fa-commenting fa-fw"></span>-->
+                    <!--    <a href="">我的书评</a>-->
+                    <!--</li>-->
                     <li>
                         <span class="fa fa-gear fa-fw"></span>
                         <a th:href="@{/front/index/toFeedBack}">我的反馈</a>

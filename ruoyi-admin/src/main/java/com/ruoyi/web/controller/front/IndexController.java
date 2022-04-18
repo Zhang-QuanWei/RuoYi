@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.front;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -15,6 +16,7 @@ import com.ruoyi.novel.domain.Book;
 import com.ruoyi.novel.service.AuthorCodeService;
 import com.ruoyi.novel.service.impl.BookServiceImpl;
 import com.ruoyi.novel.service.impl.BookShelfServiceImpl;
+import com.ruoyi.novel.vo.SearchDataVo;
 import com.ruoyi.system.domain.SysNotice;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysNoticeService;
@@ -66,12 +68,14 @@ public class IndexController extends BaseController {
     @GetMapping("")
     public String toIndex(ModelMap modelMap)
     {
+        Book book = new Book();
+        book.setCheckStatus(1);
         Integer pageNum = 1;
         Integer pageSize = 10;
         //查询5本点击量最高的书籍
         List<Book> bookList = bookService.selectNewList(null);
         //查询书籍列表
-        PageInfo<Book> pageInfo = bookService.getBookList(pageNum, pageSize,null);
+        PageInfo<Book> pageInfo = bookService.getBookList(pageNum, pageSize,book);
         //查询3条公告
         List<SysNotice> noticeList = noticeService.selectNewList(null);
 
@@ -91,17 +95,15 @@ public class IndexController extends BaseController {
      * @return
      */
     @GetMapping("/allWork")
-    public String toAllWork(HttpServletResponse response,ModelMap modelMap){
-        Integer pageNum = 1;
-        Integer pageSize = 10;
-        PageInfo<Book> pageInfo = bookService.getBookList(pageNum, pageSize,null);
+    public String toAllWork(SearchDataVo searchDataVo,ModelMap modelMap){
+
+        PageInfo<Book> pageInfo = bookService.getBookListByItem(1,10,searchDataVo);
 
         SysUser user = ShiroUtils.getSysUser();
+        modelMap.put("user",user);
 
-        if (StringUtils.isNotNull(user)){
-            modelMap.put("user",user);
-        }
 
+        modelMap.put("searchDataVo", JSONObject.toJSON(searchDataVo));
         modelMap.put("pageInfo",pageInfo);
 
         return prefix + "/allWork";
@@ -305,10 +307,12 @@ public class IndexController extends BaseController {
     @PostMapping("/toNovelResult")
     public String toNovelResult(Book book,ModelMap modelMap){
 
+        book.setCheckStatus(1);
+
         Integer pageNum = 1;
         Integer pageSize = 10;
 
-        PageInfo<Book> pageInfo = bookService.getBookList(pageNum, pageSize,book);
+        PageInfo<Book> pageInfo = bookService.getBookList(pageNum,pageSize,book);
 
         modelMap.put("pageInfo",pageInfo);
 

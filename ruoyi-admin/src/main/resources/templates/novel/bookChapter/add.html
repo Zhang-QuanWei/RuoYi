@@ -100,7 +100,7 @@
                         // 关闭遮罩层信息
                         $.modal.closeLoading();
                         //添加章节内容失败！
-                        $.modal.msgError("章节信息添加失败，请联系管理员！");
+                        $.modal.alertError(result.msg);
                     }
 
             });

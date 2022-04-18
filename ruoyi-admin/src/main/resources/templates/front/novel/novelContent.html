@@ -154,9 +154,30 @@
 
     </div>
 
+    <!-- 隐藏域 -->
+    <input type="hidden" id="id" name="id" th:value="${chapter.id}">
+    <input type="hidden" id="bookId" name="bookId" th:value="${chapter.bookId}">
+    <input type="hidden" id="chapterIndex" name="chapterIndex" th:value="${chapter.chapterIndex}">
     <!-- 尾部标签页 -->
     <div class="footer container">
         <p class="text-center">基于SpringBoot的网文阅读网的设计与实现 | create by @zqw | 联系方式：goodzhang888@163.com</p>
     </div>
+
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+
+        $.post(ctx + "front/novel/addShelfIndex",{
+            bookId: $('#bookId').val(),
+            id: $('#id').val(),
+            chapterIndex: $('#chapterIndex').val()
+        },function (result) {
+            if (result.code == web_status.SUCCESS){
+                console.log(result.msg);
+            }else {
+                console.log(result.msg);
+            }
+        });
+
+    </script>
 </body>
 </html>

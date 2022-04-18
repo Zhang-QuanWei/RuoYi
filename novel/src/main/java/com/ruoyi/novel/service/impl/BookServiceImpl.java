@@ -17,6 +17,7 @@ import com.ruoyi.novel.mapper.BookCommentMapper;
 import com.ruoyi.novel.mapper.ChapterContentMapper;
 import com.ruoyi.novel.service.BookService;
 import com.ruoyi.novel.mapper.BookMapper;
+import com.ruoyi.novel.vo.SearchDataVo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -256,7 +257,10 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
     public PageInfo<Book> selectBookListOrderByItem(Integer queryItem,int pageNum, int pageSize) {
         //0:点击榜、1:订阅榜、2:更新榜
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByAsc(queryItem == 0,"visit_count").orderByAsc(queryItem == 1,"subs_num").orderByDesc(queryItem == 2,"update_time");
+        queryWrapper.eq("check_status",1)
+                .orderByAsc(queryItem == 0,"visit_count")
+                .orderByAsc(queryItem == 1,"subs_num")
+                .orderByDesc(queryItem == 2,"update_time");
 
         PageHelper.startPage(pageNum,pageSize);
         List<Book> bookList = bookMapper.selectList(queryWrapper);
@@ -273,7 +277,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
     @Override
     public List<Book> selectNewList(Book book) {
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
-        queryWrapper.orderByDesc("visit_count").last("limit 5");
+        queryWrapper.eq("check_status",1)
+                .orderByDesc("visit_count").last("limit 5");
         List<Book> bookList = bookMapper.selectList(queryWrapper);
 
         return bookList;
@@ -286,7 +291,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
      */
     public List<Book> selectBookListByBookCategory(String bookCategory) {
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("book_category",bookCategory).orderByDesc("visit_count").last("limit 10");
+        queryWrapper.eq("check_status",1)
+                .eq("book_category",bookCategory).orderByDesc("visit_count").last("limit 10");
         List<Book> bookList = bookMapper.selectList(queryWrapper);
 
         return bookList;
@@ -304,6 +310,87 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
         book.setCheckStatus(2);
         return bookMapper.updateById(book) > 0? true : false;
 
+    }
+
+    /**
+     * 全部作品条件查询
+     * @param pageNum
+     * @param pageSize
+     * @param searchDataVo
+     * @return
+     */
+    public PageInfo<Book> getBookListByItem(int pageNum, int pageSize, SearchDataVo searchDataVo) {
+
+        // 字数条件
+        int startWord = 0;
+        int endWord = 0;
+        if (StringUtils.isNotNull(searchDataVo.getBookWord())){
+            if (searchDataVo.getBookWord() == 0){
+                //0-30万字
+                startWord = 0;
+                endWord = 300000;
+            }
+            if (searchDataVo.getBookWord() == 1){
+                //30-50万字
+                startWord = 300000;
+                endWord = 500000;
+            }
+            if (searchDataVo.getBookWord() == 2){
+                //50-100万字
+                startWord = 500000;
+                endWord = 1000000;
+            }
+            if (searchDataVo.getBookWord() == 3){
+                //100万字以上
+                startWord = 1000000;
+                endWord = 100000000;
+            }
+        }
+
+        QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("check_status",1)
+                .eq(StringUtils.isNotNull(searchDataVo.getBookCategory()),"book_category",String.valueOf(searchDataVo.getBookCategory()))
+                .eq(StringUtils.isNotNull(searchDataVo.getBookStatus()),"book_status",searchDataVo.getBookStatus())
+                .between(StringUtils.isNotNull(searchDataVo.getBookWord()),"book_word",startWord,endWord);
+
+        // 更新时间
+        if (StringUtils.isNotNull(searchDataVo.getTimeItem())){
+            if (searchDataVo.getTimeItem() == 0){
+                //三日内
+                queryWrapper.apply("DATE_SUB(CURDATE(), INTERVAL 2 DAY) <= date(update_time)");
+            }
+            if (searchDataVo.getTimeItem() == 1){
+                //七日内
+                queryWrapper.apply("DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(update_time)");
+            }
+            if (searchDataVo.getTimeItem() == 2){
+                //半月内
+                queryWrapper.apply("DATE_SUB(CURDATE(), INTERVAL 14 DAY) <= date(update_time)");
+            }
+            if (searchDataVo.getTimeItem() == 3){
+                //一月内
+                queryWrapper.apply("DATE_FORMAT( update_time, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' )");
+            }
+        }
+
+        // 排序条件
+        if (StringUtils.isNotNull(searchDataVo.getOrderByItem())){
+            if (searchDataVo.getOrderByItem() == 0){
+                queryWrapper.orderByDesc("update_time");
+            }
+            if (searchDataVo.getOrderByItem() == 1){
+                queryWrapper.orderByDesc("book_word");
+            }
+            if (searchDataVo.getOrderByItem() == 2){
+                queryWrapper.orderByDesc("visit_count");
+            }
+        }
+
+        PageHelper.startPage(pageNum,pageSize);
+        List<Book> bookList = bookMapper.selectList(queryWrapper);
+        PageInfo<Book> pageInfo = new PageInfo<>(bookList);
+
+        return pageInfo;
     }
 }
 

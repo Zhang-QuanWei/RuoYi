@@ -2,6 +2,7 @@ package com.ruoyi.novel.mapper;
 
 import com.ruoyi.novel.domain.Book;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ruoyi.novel.vo.SearchDataVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.List;
 public interface BookMapper extends BaseMapper<Book> {
 
     List<Book> selectBookList(Book book);
-
 
 
 }

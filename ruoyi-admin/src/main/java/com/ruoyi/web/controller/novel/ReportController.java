@@ -4,8 +4,8 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.novel.domain.Feedback;
-import com.ruoyi.novel.service.FeedbackService;
-import com.ruoyi.system.domain.SysPost;
+import com.ruoyi.novel.domain.Report;
+import com.ruoyi.novel.service.ReportService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,46 +16,48 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @Controller
-@RequestMapping("/novel/feedback")
-public class FeedBackController extends BaseController {
+@RequestMapping("/novel/report")
+public class ReportController extends BaseController {
 
     @Resource
-    private FeedbackService feedbackService;
+    private ReportService reportService;
 
-    private String prefix = "novel/feedback";
+    private String prefix = "novel/report";
 
+    /**
+     * 跳转举报管理页面
+     * @return
+     */
     @GetMapping()
-    public String open(){
-
-        return prefix + "/feedback";
+    public String report(){
+        return prefix + "/report";
     }
 
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(Feedback feedback)
+    public TableDataInfo list(Report report)
     {
         //查询未受理的举报信息
-        feedback.setResolutionStatus(0);
+        report.setSolveStatus(0);
+
 
         startPage();
-        List<Feedback> list = feedbackService.selectFeedBackList(feedback);
+        List<Report> list = reportService.selectReportList(report);
         return getDataTable(list);
     }
 
     @PostMapping("/solve")
     @ResponseBody
-    public AjaxResult solve(Feedback feedback){
-        Feedback info = feedbackService.selectFeedBackById(feedback.getId());
+    public AjaxResult solve(Report report){
+        Report info = reportService.selectReportById(report.getId());
 
-        Boolean result = feedbackService.sloveFeedBack(info);
+        Boolean result = reportService.sloveReport(info);
 
         if (result){
-            return AjaxResult.success("反馈问题已解决！");
+            return AjaxResult.success("举报问题已解决！");
         }
 
-        return AjaxResult.error("反馈问题未解决，请联系开发人员！");
+        return AjaxResult.error("举报问题未解决，请联系开发人员！");
     }
-
-
 
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+<html lang="en" xmlns:th="http://www.thymeleaf.org"  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: front_header('完美阅读')"/>
 
@@ -97,13 +97,13 @@
                             </span>
                     </div>
                     <!-- 表单 -->
-                    <form class="navbar-form navbar-left" role="search">
+                    <form class="navbar-form navbar-left" role="search" th:action="@{/front/index/toNovelResult}" th:method="post">
                         <div class="form-group">
-                            <input type="text" class="form-control" placeholder="书名、作者、关键字">
+                            <input name="bookName" type="text" class="form-control" placeholder="请输入书名...">
                         </div>
                         <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
                     </form>
-                    <!-- 文字 -->
+                    <!-- 书架、登录 -->
                     <p class="navbar-text navbar-right"><a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toBookShelf}" class="navbar-link"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> 我的书架</a> | <a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toUserInfo}" class="navbar-link" th:text="${user eq null}? '登录' : ${user.userName}">登录</a></p>
                 </div>
             </nav>
@@ -122,7 +122,15 @@
                     <li role="presentation"><a th:href="@{/front/index}">首页</a></li>
                     <li role="presentation" class="active"><a th:href="@{/front/index/allWork}">全部作品</a></li>
                     <li role="presentation"><a th:href="@{/front/index/toRankList}">排行榜</a></li>
-                    <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                    <shiro:hasAnyRoles name="author,editor,administrator,admin">
+                        <li role="presentation"><a th:href="@{/index}">作家专区</a></li>
+                    </shiro:hasAnyRoles>
+                    <shiro:hasRole name="common">
+                        <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                    </shiro:hasRole>
+                    <shiro:notAuthenticated>
+                        <li role="presentation"><a th:href="@{/front/index/login}">作家专区</a></li>
+                    </shiro:notAuthenticated>
                 </ul>
             </div>
 
@@ -136,22 +144,7 @@
         <!-- 分类区 -->
         <div class="channel category row">
 
-            <!-- 作品频道 -->
-            <div class="line row">
-
-                <div class="title col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    作品频道:
-                </div>
-
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">男生频道</a>
-                </div>
-
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">女生频道</a>
-                </div>
-
-            </div>
+            <input type="hidden" id="searchDataVo" name="searchDataVo" th:value="${searchDataVo}">
 
             <!-- 作品分类 -->
             <div class="bookCategory line row">
@@ -160,32 +153,40 @@
                     作品分类:
                 </div>
 
-                <div filter="non" class="on bookCategory-non col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)" >不限</a>
+                <div filter="non" th:class="${searchDataVo.bookCategory eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category('')">不限</a>
                 </div>
 
-                <div filter="0" class="bookCategory-0 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">奇幻玄幻</a>
+                <div filter="0" th:class="${searchDataVo.bookCategory eq 0}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(0)">奇幻玄幻</a>
                 </div>
 
-                <div filter="1" class="bookCategory-1 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">武侠仙侠</a>
+                <div filter="1" th:class="${searchDataVo.bookCategory eq 1}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(1)">武侠仙侠</a>
                 </div>
 
-                <div filter="2" class="bookCategory-2 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">历史军事</a>
+                <div filter="2" th:class="${searchDataVo.bookCategory eq 2}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(2)">历史军事</a>
                 </div>
 
-                <div filter="3" class="bookCategory-3 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">都市娱乐</a>
+                <div filter="3" th:class="${searchDataVo.bookCategory eq 3}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(3)">都市娱乐</a>
                 </div>
 
-                <div filter="4" class="bookCategory-4 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">科幻娱乐</a>
+                <div filter="4" th:class="${searchDataVo.bookCategory eq 4}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(4)">科幻游戏</a>
                 </div>
 
-                <div filter="5" class="bookCategory-5 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">悬疑灵异</a>
+                <div filter="5" th:class="${searchDataVo.bookCategory eq 5}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(5)">悬疑灵异</a>
+                </div>
+
+                <div filter="5" th:class="${searchDataVo.bookCategory eq 6}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(6)">动漫同人</a>
+                </div>
+
+                <div filter="5" th:class="${searchDataVo.bookCategory eq 7}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="category(7)">花语女生</a>
                 </div>
 
 
@@ -199,17 +200,17 @@
                 </div>
 
 
-                <div filter="non" class="on bookStatus-non col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">不限</a>
+                <div filter="non" th:class="${searchDataVo.bookStatus eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookStatusItem('')">不限</a>
                 </div>
 
 
-                <div filter="0" class="bookStatus-0 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">连载中</a>
+                <div filter="0" th:class="${searchDataVo.bookStatus eq 0}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookStatusItem(0)">连载中</a>
                 </div>
 
-                <div filter="1" class="bookStatus-1 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">已完结</a>
+                <div filter="1" th:class="${searchDataVo.bookStatus eq 1}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookStatusItem(1)">已完结</a>
                 </div>
 
 
@@ -224,24 +225,24 @@
                 </div>
 
 
-                <div filter="non" class="on bookWord-non col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">不限</a>
+                <div filter="non" th:class="${searchDataVo.bookWord eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookword('')">不限</a>
                 </div>
 
-                <div filter="30" class="bookWord-below30 item col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">30万字以下</a>
+                <div filter="30" th:class="${searchDataVo.bookWord eq 0}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookword(0)">30万字以下</a>
                 </div>
 
-                <div filter="50" class="bookWord-below50 item col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">30-50万字</a>
+                <div filter="50" th:class="${searchDataVo.bookWord eq 1}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookword(1)">30-50万字</a>
                 </div>
 
-                <div filter="100" class="bookWord-below100 item col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">50-100万字</a>
+                <div filter="100" th:class="${searchDataVo.bookWord eq 2}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookword(2)">50-100万字</a>
                 </div>
 
-                <div filter="1000" class="bookWord-more100 item col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">100万字以上</a>
+                <div filter="1000" th:class="${searchDataVo.bookWord eq 3}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="bookword(3)">100万字以上</a>
                 </div>
             </div>
 
@@ -252,20 +253,20 @@
                     更新时间:
                 </div>
 
-                <div filter="non" class="on bookUpdate-non col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">不限</a>
+                <div filter="non" th:class="${searchDataVo.timeItem eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="changeTime('')">不限</a>
                 </div>
-                <div filter="3" class="bookUpdate-3 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">三日内</a>
+                <div filter="3" th:class="${searchDataVo.timeItem eq 0}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="changeTime(0)">三日内</a>
                 </div>
-                <div filter="7" class="bookUpdate-7 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">七日内</a>
+                <div filter="7" th:class="${searchDataVo.timeItem eq 1}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="changeTime(1)">七日内</a>
                 </div>
-                <div filter="15" class="bookUpdate-15 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">半月内</a>
+                <div filter="15" th:class="${searchDataVo.timeItem eq 2}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="changeTime(2)">半月内</a>
                 </div>
-                <div filter="30" class="bookUpdate-30 col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">一月内</a>
+                <div filter="30" th:class="${searchDataVo.timeItem eq 3}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="changeTime(3)">一月内</a>
                 </div>
             </div>
 
@@ -276,17 +277,17 @@
                     排序方式:
                 </div>
 
-                <div class="on col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">不限</a>
+                <div th:class="${searchDataVo.orderByItem eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="orderBy('')">不限</a>
                 </div>
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">更新时间</a>
+                <div th:class="${searchDataVo.orderByItem eq 0}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="orderBy(0)">更新时间</a>
                 </div>
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">总字数</a>
+                <div th:class="${searchDataVo.orderByItem eq 1}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="orderBy(1)">总字数</a>
                 </div>
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <a href="javascript:void(0)">点击量</a>
+                <div th:class="${searchDataVo.orderByItem eq 2}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                    <a href="javascript:void(0)" onclick="orderBy(2)">点击量</a>
                 </div>
 
 
@@ -324,9 +325,11 @@
                             </div>
 
                             <div class="bookLink row">
-                                <a href="" th:text="${book.authorName}">小白作家</a> |
-                                <a href="" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
-                                <span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |
+                                <span th:text="${book.authorName}">小白作家</span> |
+                                <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                                <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                                <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                                <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
                                 <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
                             </div>
 
@@ -359,9 +362,11 @@
                             </div>
 
                             <div class="bookLink row">
-                                <a href="" th:text="${book.authorName}">小白作家</a> |
-                                <a href="" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
-                                <span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |
+                                <span th:text="${book.authorName}">小白作家</span> |
+                                <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                                <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                                <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                                <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
                                 <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
                             </div>
 
@@ -416,59 +421,135 @@
     </div>
 
     <th:block th:include="include :: footer" />
-    <!-- jquery-session插件 -->
-    <th:block th:include="include :: jquery-session-js"/>
 
 
     <script th:inline="javascript">
 
         var prefix = ctx + "front/allWork";
 
-        $(".category a").click(function () {
-            //1. 设置点击效果
-            //移除当前元素所有父级元素中class为on的元素的class名“on”
-            $(this).parent().siblings(".on").removeClass("on");
-            //为当前元素的父元素添加class名“on”
-            $(this).parent().addClass("on");
+        //获取历史查询条件对象
+        var searchDataVo =  JSON.parse($('#searchDataVo').val());
+        console.log("历史查询条件为：" +searchDataVo);
+        console.log("种类："+searchDataVo.bookCategory);
+        console.log("状态："+searchDataVo.bookStatus);
+        console.log("排序条件："+searchDataVo.orderByItem);
+        console.log("字数："+searchDataVo.bookWord);
+        console.log("时间："+searchDataVo.timeItem);
 
-            //2. 获取各部分条件
-            var searchData = {};
-            // 书籍种类
-            var bookCategory = $(".bookCategory > .on").attr("filter");
-            if (bookCategory != "non"){
-                searchData.bookCategory = bookCategory;
-            }else {
-                searchData.bookCategory = null;
-            }
-            //完结状态
-            var bookStatus = $(".bookStatus > .on").attr("filter");
-            if (bookStatus != "non"){
-                searchData.bookStatus = bookStatus;
-            }else {
-                searchData.bookStatus = null;
-            }
-            //作品字数
-            var bookWord = $(".bookWord > .on").attr("filter");
-            if (bookWord != "non"){
-                searchData.bookWord = bookWord;
-            }else {
-                searchData.bookWord = null;
-            }
-            //更新时间
-            var bookUpdate = $(".bookUpdate > .on").attr("filter");
-            if (bookUpdate != "non"){
-                searchData.bookUpdate = bookUpdate;
-            }else {
-                searchData.bookUpdate = null;
-            }
 
-            console.log(searchData);
-            //3. ajax查询
-            // $.operate.post(prefix + "/list",{
-            //     searchData:searchData
-            // });
+        //构造查询条件对象
+        var bookItem = {
+            bookCategory: '',
+            bookStatus: '',      //null无法被Integer类型识别
+            orderByItem: '',
+            bookWord: '',
+            timeItem: ''
+        };
 
-        });
+        //格式转化
+        //种类
+        if (searchDataVo.bookCategory === undefined){
+            bookItem.bookCategory = '';
+        }else {
+            bookItem.bookCategory = searchDataVo.bookCategory;
+        }
+        //状态
+        if(searchDataVo.bookStatus === undefined){
+            bookItem.bookStatus = '';
+        }else {
+            bookItem.bookStatus = searchDataVo.bookStatus;
+        }
+        //排序类型
+        if (searchDataVo.orderByItem === undefined){
+            bookItem.orderByItem = '';
+        }else {
+            bookItem.orderByItem = searchDataVo.orderByItem;
+        }
+        //字数
+        if (searchDataVo.bookWord === undefined){
+            bookItem.bookWord = '';
+        }else {
+            bookItem.bookWord = searchDataVo.bookWord;
+        }
+        //时间
+        if (searchDataVo.timeItem === undefined){
+            bookItem.timeItem = '';
+        }else {
+            bookItem.timeItem = searchDataVo.timeItem;
+        }
+
+        console.log("本次查询对象（暂时）为："+bookItem);
+        console.log(bookItem);
+        console.log(bookItem.bookCategory);
+        console.log(bookItem.bookStatus);
+        console.log(bookItem.orderByItem);
+        console.log(bookItem.bookWord);
+        console.log(bookItem.timeItem);
+
+
+        /**
+         * 点击事件
+         * @param type
+         */
+        //作品分类
+        function category(type) {
+
+            bookItem.bookCategory = type;
+            console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+            console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+            console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+            console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+            console.log("本次查询的时间条件为：" + bookItem.timeItem);
+            location.href = prefix + "/list?bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+
+        }
+
+        //完结状态
+        function bookStatusItem(type) {
+            bookItem.bookStatus = type;
+            console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+            console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+            console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+            console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+            console.log("本次查询的时间条件为：" + bookItem.timeItem);
+            location.href = prefix + "/list?bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+        }
+
+        //作品字数
+        function bookword(type) {
+            bookItem.bookWord = type;
+            console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+            console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+            console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+            console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+            console.log("本次查询的时间条件为：" + bookItem.timeItem);
+            location.href = prefix + "/list?bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+        }
+
+        //排序条件
+        function orderBy(item) {
+            bookItem.orderByItem = item;
+            console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+            console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+            console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+            console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+            console.log("本次查询的时间条件为：" + bookItem.timeItem);
+            location.href = prefix + "/list?bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+        }
+
+        //更新时间
+        function changeTime(type) {
+            bookItem.timeItem = type;
+            console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+            console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+            console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+            console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+            console.log("本次查询的时间条件为：" + bookItem.timeItem);
+            location.href = prefix + "/list?bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+        }
+        
+        
+
     </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"  xmlns:th="http://www.thymeleaf.org"  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: front_header('完美阅读')"/>
     <!-- 轮播图css -->
@@ -49,8 +49,7 @@
                     <li role="presentation" class="active"><a th:href="@{/front/index}">首页</a></li>
                     <li role="presentation"><a th:href="@{/front/index/allWork}">全部作品</a></li>
                     <li role="presentation"><a th:href="@{/front/index/toRankList}">排行榜</a></li>
-                    <!-- th:href="@{/front/index/toAuthorRegis}" -->
-                    <shiro:hasAnyRoles name="author,editor,admin">
+                    <shiro:hasAnyRoles name="author,editor,administrator,admin">
                         <li role="presentation"><a th:href="@{/index}">作家专区</a></li>
                     </shiro:hasAnyRoles>
                     <shiro:hasRole name="common">
@@ -127,17 +126,17 @@
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">奇幻玄幻</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=0)}">奇幻玄幻</a>
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">武侠仙侠</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=1)}">武侠仙侠</a>
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">历史军事</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=2)}">历史军事</a>
                     </div>
 
                 </div>
@@ -146,17 +145,17 @@
                 <div class="line row">
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">都市娱乐</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=3)}">都市娱乐</a>
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">科幻游戏</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=4)}">科幻游戏</a>
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">悬疑灵异</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=5)}">悬疑灵异</a>
                     </div>
                 </div>
 
@@ -164,18 +163,18 @@
                 <div class="line row">
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">动漫同人</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=6)}">动漫同人</a>
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">花语女生</a>
+                        <a th:href="@{/front/index/allWork(bookCategory=7)}">花语女生</a>
                     </div>
 
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <span></span>
-                        <a href="">全部作品</a>
+                        <a th:href="@{/front/index/allWork}">全部作品</a>
                     </div>
 
                 </div>
@@ -214,9 +213,11 @@
                                 </div>
 
                                 <div class="bookLink row">
-                                    <a href="" th:text="${book.authorName}">小白作家</a> |
-                                    <a href="" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
-                                    <span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |
+                                    <span th:text="${book.authorName}">小白作家</span> |
+                                    <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                                    <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                                    <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                                    <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
                                     <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
                                 </div>
 
@@ -249,9 +250,11 @@
                             </div>
 
                             <div class="bookLink row">
-                                <a href="" th:text="${book.authorName}">小白作家</a> |
-                                <a href="" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
-                                <span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |
+                                <span th:text="${book.authorName}">小白作家</span> |
+                                <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                                <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                                <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                                <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
                                 <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
                             </div>
 

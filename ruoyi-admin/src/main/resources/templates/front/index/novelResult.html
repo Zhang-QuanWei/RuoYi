@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <th:block th:include="include :: front_header('搜索结果')"/>
 
@@ -96,7 +96,15 @@
                     <li role="presentation" class="active"><a th:href="@{/front/index}">首页</a></li>
                     <li role="presentation"><a th:href="@{/front/index/allWork}">全部作品</a></li>
                     <li role="presentation"><a th:href="@{/front/index/toRankList}">排行榜</a></li>
-                    <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                    <shiro:hasAnyRoles name="author,editor,administrator,admin">
+                        <li role="presentation"><a th:href="@{/index}">作家专区</a></li>
+                    </shiro:hasAnyRoles>
+                    <shiro:hasRole name="common">
+                        <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                    </shiro:hasRole>
+                    <shiro:notAuthenticated>
+                        <li role="presentation"><a th:href="@{/front/index/login}">作家专区</a></li>
+                    </shiro:notAuthenticated>
                 </ul>
             </div>
 
@@ -136,9 +144,11 @@
                             </div>
 
                             <div class="bookLink row">
-                                <a href="" th:text="${book.authorName}">小白作家</a> |
-                                <a href="" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
-                                <span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |
+                                <span th:text="${book.authorName}">小白作家</span> |
+                                <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                                <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                                <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                                <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
                                 <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
                             </div>
 
@@ -171,9 +181,11 @@
                             </div>
 
                             <div class="bookLink row">
-                                <a href="" th:text="${book.authorName}">小白作家</a> |
-                                <a href="" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
-                                <span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |
+                                <span th:text="${book.authorName}">小白作家</span> |
+                                <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                                <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                                <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                                <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
                                 <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
                             </div>
 

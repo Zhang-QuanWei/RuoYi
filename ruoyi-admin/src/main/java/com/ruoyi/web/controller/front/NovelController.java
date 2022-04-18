@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.front;
 
+import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
+import com.github.houbb.sensitive.word.support.result.WordResultHandlers;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
@@ -7,8 +9,10 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.novel.domain.*;
+import com.ruoyi.novel.service.ReportService;
 import com.ruoyi.novel.service.impl.*;
 import com.ruoyi.system.service.impl.SysUserServiceImpl;
+import org.aspectj.weaver.loadtime.Aj;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +44,9 @@ public class NovelController extends BaseController {
     @Resource
     private BookShelfServiceImpl bookShelfService;
 
+    @Resource
+    private ReportService reportService;
+
     private String prefix = "/front/novel";
 
     /**
@@ -50,51 +57,33 @@ public class NovelController extends BaseController {
      */
     @GetMapping()
     public String toNovelInfo(Book book, ModelMap modelMap){
+        //book中只有id
 
         SysUser user = ShiroUtils.getSysUser();
+        modelMap.put("user",user);
 
-        if (StringUtils.isNotNull(user)){
-            modelMap.put("user",user);
-        }else {
-            modelMap.put("user",null);
-        }
-
-        String lastChapterTitle = "";
-        Date lastChapterUpdatetime = null;
-
-        // TODO 前台获取作者头像问题（或许是权限问题）
+        //1. 获取书籍对象
         Book result = bookService.selectBookByBookId(book.getId());
-        // SysUser user = userService.selectUserByLoginName(book.getAuthorName());
+        modelMap.put("book",result);
 
+        //2. 查询同类型书籍里点击量最高的10本书
+        List<Book> bookList = bookService.selectBookListByBookCategory(result.getBookCategory());
+        modelMap.put("bookList",bookList);
+
+        // 增加点击量
         // Long newVisit = book.getVisitCount() + (long) 1;
-
         //点击数+1
         // book.setVisitCount(newVisit);
 
+        //查询评论集合
         List<BookComment> bookCommentList = bookCommentService.selectCommentListByBookId(book.getId());
-        if (StringUtils.isNull(bookCommentList)){
-            modelMap.put("bookCommentList",null);
-        }else {
-            modelMap.put("bookCommentList",bookCommentList);
-        }
+        modelMap.put("bookCommentList",bookCommentList);
 
         //查询最新章节
         Integer MaxChapterIndex = bookChapterService.selectMaxChapterIndexByBookId(book.getId());
         if (StringUtils.isNotNull(MaxChapterIndex)){
             BookChapter bookChapter = bookService.getlastChapter(book.getId(),MaxChapterIndex);
-            lastChapterTitle = bookChapter.getChapterTitle();
-            lastChapterUpdatetime = bookChapter.getUpdateTime();
-        }
-
-
-        if (StringUtils.isNotNull(result)){
-            modelMap.put("book",result);
-            modelMap.put("lastChapterTitle",lastChapterTitle);
-            modelMap.put("lastChapterUpdatetime",lastChapterUpdatetime);
-
-            // modelMap.put("authorPic",user.getAvatar());
-        }else {
-            System.out.println("未查询到相关书籍！");
+            modelMap.put("lastBookChapter",bookChapter);
         }
 
         return prefix + "/novelInfo";
@@ -186,6 +175,13 @@ public class NovelController extends BaseController {
     @ResponseBody
     public AjaxResult addComment(BookComment bookComment){
 
+        //评论内容是否包含敏感词
+        boolean isSenWords = SensitiveWordHelper.contains(bookComment.getCommentContent());
+        //替换敏感词
+        if (isSenWords){
+            bookComment.setCommentContent(SensitiveWordHelper.replace(bookComment.getCommentContent()));
+        }
+
         bookComment.setCreateTime(DateUtils.parseDate(DateUtils.getTime()));
 
         boolean result = bookCommentService.save(bookComment);
@@ -215,6 +211,126 @@ public class NovelController extends BaseController {
         return AjaxResult.error("添加失败！");
     }
 
+    /**
+     * 添加书架索引
+     * @param bookChapter
+     */
+    @PostMapping("/addShelfIndex")
+    @ResponseBody
+    public AjaxResult addShelfIndex(BookChapter bookChapter){
+        SysUser user = ShiroUtils.getSysUser();
+        if (StringUtils.isNotNull(user)){
+            //1. 判断该本书籍是否被添加到了用户的书架中
+            BookShelf bookShelf = bookShelfService.isShelf(user.getUserId(),bookChapter.getBookId());
+            if (StringUtils.isNotNull(bookShelf)){
+                //2. 为当前阅读页添加索引
+                bookShelf.setChapterIndex(bookChapter.getChapterIndex());
+                boolean result = bookShelfService.updateById(bookShelf);
+                if (result){
+                    return AjaxResult.success("索引添加成功！");
+                }else {
+                    return AjaxResult.error("索引添加失败！");
+                }
+            }
+            return AjaxResult.success("无需添加索引");
+        }
+        return AjaxResult.success("无需添加索引");
+    }
 
+    /**
+     * 跳转继续阅读
+     * @return
+     */
+    @GetMapping("/toLastNovelContent")
+    public String toLastNovelContent(BookChapter bookChapter,ModelMap modelMap){
+        SysUser user = ShiroUtils.getSysUser();
+        modelMap.put("user",user);
+        BookChapter chapter;
+
+        //1. 查询上次阅读索引
+        BookShelf shelf = bookShelfService.isShelf(user.getUserId(), bookChapter.getBookId());
+        if (StringUtils.isNotNull(shelf.getChapterIndex())){
+            //阅读索引不为空则跳转上次阅读界面
+            //查询上次阅读章节
+            chapter = bookChapterService.selectBookChapter(bookChapter.getBookId(),shelf.getChapterIndex());
+        }else {
+            //阅读索引为空则跳转第一章界面
+            //查询第一章章节
+            chapter = bookChapterService.selectBookChapter(bookChapter.getBookId(),1);
+        }
+
+
+        //查询章节内容
+        ChapterContent content = chapterContentService.selectChapterContentById(chapter.getChapterId());
+        //查询最大章节索引
+        Integer maxIndex = bookChapterService.selectMaxChapterIndexByBookId(bookChapter.getBookId());
+
+
+
+        modelMap.put("chapter",chapter);
+        modelMap.put("content",content);
+        modelMap.put("maxChpaterIndex",maxIndex);
+
+        return prefix + "/novelContent";
+    }
+
+    /**
+     * 下架作品
+     * @param book
+     * @return
+     */
+    @PostMapping("/offShelf")
+    @ResponseBody
+    public AjaxResult offShelf(Book book){
+        //设置当前书籍状态为审核不通过
+        Boolean result = bookService.updateBookCheck(book.getId());
+
+        if (result){
+            return AjaxResult.success("下架作品成功！");
+        }else {
+            return AjaxResult.error("下架作品失败！请联系管理员！");
+        }
+
+    }
+
+    /**
+     * 跳转举报页面
+     * @return
+     */
+    @GetMapping("/toReport")
+    public String toReport(Book book,ModelMap modelMap){
+
+        SysUser user = ShiroUtils.getSysUser();
+        modelMap.put("user",user);
+
+        //通过id查询到书籍
+        Book result = bookService.selectBookByBookId(book.getId());
+        modelMap.put("book",result);
+
+        return prefix + "/report";
+    }
+
+    /**
+     * 前台添加举报
+     * @return
+     */
+    @PostMapping("/addReport")
+    @ResponseBody
+    public AjaxResult addReport(Report report){
+
+        //设置创建时间
+        report.setCreateTime(DateUtils.parseDate(DateUtils.getTime()));
+
+        //设置受理状态
+        report.setSolveStatus(0);
+
+        boolean result = reportService.save(report);
+
+        if (result){
+            return AjaxResult.success("举报成功！感谢您对净化网络做出的贡献，我们将尽快处理。");
+        }
+
+        return AjaxResult.error("举报出错，请联系管理员！");
+    }
 
 }

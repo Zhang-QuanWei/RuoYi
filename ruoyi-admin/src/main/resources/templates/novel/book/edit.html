@@ -14,6 +14,7 @@
 
     <form class="form-horizontal m" id="form-book-edit" th:object="${book}">
         <input id="bookId" name="bookId" type="hidden" th:field="*{id}"/>
+        <input id="checkStatus" name="checkStatus" type="hidden" th:field="*{checkStatus}"/>
         <div class="form-group">
             <label class="col-sm-3 control-label">小说名称：</label>
             <div class="col-sm-9">
@@ -76,8 +77,6 @@
         var icon = "<i class='fa fa-times-circle'></i> ";
 
         var imgPicUrl =  $("#picUrl").val();
-
-        console.log(imgPicUrl);
 
 
         //首先进行表单校验
