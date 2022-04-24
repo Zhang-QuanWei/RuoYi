@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: front_header('搜索结果')"/>
+
+    <style>
+        .category .title{
+            color: #999;
+        }
+
+        .category .line{
+            margin-bottom: 10px;
+        }
+
+        .category a{
+            text-decoration:none;
+            color: #151515;
+        }
+
+        .category a:hover{
+            color: rgb(84, 165, 108);
+        }
+
+        .bookWord .item{
+            width: 9em;
+        }
+
+        .bookImg img{
+            width: 100px;
+            height: 132px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px 0 rgb(0 0 0 / 20%);
+        }
+
+        .bookTitle a{
+            font-size: 20px;
+            color: #333;
+        }
+
+        .bookTitle a:link{
+            text-decoration: none;
+        }
+
+        .bookTitle a:hover{
+            color: rgb(84, 165, 108);
+        }
+
+        .bookLink{
+            margin-top: 15px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: rgb(145, 143, 143);
+        }
+
+        .bookLink a{
+            color: rgb(145, 143, 143);
+        }
+
+        .bookLink a:link{
+            text-decoration: none;
+        }
+
+        .bookLink a:hover{
+            color: rgb(84, 165, 108);
+        }
+
+        .bookIntro {
+            font-size: 13px;
+            color: #666;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            /* 用来限制在一个块元素显示的文本的行数 */
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+        }
+
+        .on a{
+            color: rgb(84, 165, 108);
+        }
+    </style>
+</head>
+<body>
+<!-- 页头 -->
+<div class="container">
+
+    <div class="row">
+        <!-- 导航条 -->
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!-- logo -->
+                <div class="navbar-header">
+                            <span>
+                                <a th:href="@{/front/index}">
+                                    <img alt="logo" th:src="@{/../../img/logo.png}" width="150px">
+                                </a>
+                            </span>
+                </div>
+                <!-- 表单 -->
+                <form class="navbar-form navbar-left" role="search" th:action="@{/front/index/toNovelResult}" th:method="post">
+                    <div class="form-group">
+                        <input name="bookName" type="text" class="form-control" placeholder="请输入书名...">
+                    </div>
+                    <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                </form>
+                <!-- 书架、登录 -->
+                <p class="navbar-text navbar-right"><a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toBookShelf}" class="navbar-link"><span class="glyphicon glyphicon-book" aria-hidden="true"></span> 我的书架</a> | <a th:href="${user eq null}? @{/front/index/login} : @{/front/index/toUserInfo}" class="navbar-link" th:text="${user eq null}? '登录' : ${user.userName}">登录</a></p>
+            </div>
+        </nav>
+
+    </div>
+
+</div>
+
+<!-- 导航栏 -->
+<div class="navtab" style="background-color:rgb(84, 165, 108);">
+
+    <div class="container">
+
+        <div class="row">
+            <ul class="nav nav-tabs">
+                <li role="presentation" class="active"><a th:href="@{/front/index}">首页</a></li>
+                <li role="presentation"><a th:href="@{/front/index/allWork}">全部作品</a></li>
+                <li role="presentation"><a th:href="@{/front/index/toRankList}">排行榜</a></li>
+                <shiro:hasAnyRoles name="author,editor,administrator,admin">
+                    <li role="presentation"><a th:href="@{/index}">作家专区</a></li>
+                </shiro:hasAnyRoles>
+                <shiro:hasRole name="common">
+                    <li role="presentation"><a th:href="@{/front/index/toAuthorRegis}">作家专区</a></li>
+                </shiro:hasRole>
+                <shiro:notAuthenticated>
+                    <li role="presentation"><a th:href="@{/front/index/login}">作家专区</a></li>
+                </shiro:notAuthenticated>
+            </ul>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 内容区 -->
+<div class="container">
+
+    <!-- 分类区 -->
+    <div class="channel category row">
+
+        <input type="hidden" id="searchDataVo" name="searchDataVo" th:value="${searchDataVo}">
+
+        <!-- 作品分类 -->
+        <div class="bookCategory line row">
+
+            <div class="title col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                作品分类:
+            </div>
+
+            <div filter="non" th:class="${searchDataVo.bookCategory eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category('')">不限</a>
+            </div>
+
+            <div filter="0" th:class="${searchDataVo.bookCategory eq 0}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(0)">奇幻玄幻</a>
+            </div>
+
+            <div filter="1" th:class="${searchDataVo.bookCategory eq 1}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(1)">武侠仙侠</a>
+            </div>
+
+            <div filter="2" th:class="${searchDataVo.bookCategory eq 2}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(2)">历史军事</a>
+            </div>
+
+            <div filter="3" th:class="${searchDataVo.bookCategory eq 3}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(3)">都市娱乐</a>
+            </div>
+
+            <div filter="4" th:class="${searchDataVo.bookCategory eq 4}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(4)">科幻游戏</a>
+            </div>
+
+            <div filter="5" th:class="${searchDataVo.bookCategory eq 5}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(5)">悬疑灵异</a>
+            </div>
+
+            <div filter="5" th:class="${searchDataVo.bookCategory eq 6}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(6)">动漫同人</a>
+            </div>
+
+            <div filter="5" th:class="${searchDataVo.bookCategory eq 7}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="category(7)">花语女生</a>
+            </div>
+
+
+        </div>
+
+        <!-- 是否完结 -->
+        <div class="bookStatus line row">
+
+            <div class="title col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                是否完结:
+            </div>
+
+
+            <div filter="non" th:class="${searchDataVo.bookStatus eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookStatusItem('')">不限</a>
+            </div>
+
+
+            <div filter="0" th:class="${searchDataVo.bookStatus eq 0}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookStatusItem(0)">连载中</a>
+            </div>
+
+            <div filter="1" th:class="${searchDataVo.bookStatus eq 1}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookStatusItem(1)">已完结</a>
+            </div>
+
+
+
+        </div>
+
+        <!-- 作品字数 -->
+        <div class="bookWord line row">
+
+            <div class="title col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                作品字数:
+            </div>
+
+
+            <div filter="non" th:class="${searchDataVo.bookWord eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookword('')">不限</a>
+            </div>
+
+            <div filter="30" th:class="${searchDataVo.bookWord eq 0}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookword(0)">30万字以下</a>
+            </div>
+
+            <div filter="50" th:class="${searchDataVo.bookWord eq 1}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookword(1)">30-50万字</a>
+            </div>
+
+            <div filter="100" th:class="${searchDataVo.bookWord eq 2}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookword(2)">50-100万字</a>
+            </div>
+
+            <div filter="1000" th:class="${searchDataVo.bookWord eq 3}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="bookword(3)">100万字以上</a>
+            </div>
+        </div>
+
+        <!-- 更新时间 -->
+        <div class="bookUpdate line row">
+
+            <div class="title col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                更新时间:
+            </div>
+
+            <div filter="non" th:class="${searchDataVo.timeItem eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="changeTime('')">不限</a>
+            </div>
+            <div filter="3" th:class="${searchDataVo.timeItem eq 0}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="changeTime(0)">三日内</a>
+            </div>
+            <div filter="7" th:class="${searchDataVo.timeItem eq 1}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="changeTime(1)">七日内</a>
+            </div>
+            <div filter="15" th:class="${searchDataVo.timeItem eq 2}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="changeTime(2)">半月内</a>
+            </div>
+            <div filter="30" th:class="${searchDataVo.timeItem eq 3}? 'on item col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'item col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="changeTime(3)">一月内</a>
+            </div>
+        </div>
+
+        <!-- 排序方式 -->
+        <div class="line row">
+
+            <div class="title col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                排序方式:
+            </div>
+
+            <div th:class="${searchDataVo.orderByItem eq null}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="orderBy('')">不限</a>
+            </div>
+            <div th:class="${searchDataVo.orderByItem eq 0}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="orderBy(0)">更新时间</a>
+            </div>
+            <div th:class="${searchDataVo.orderByItem eq 1}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="orderBy(1)">总字数</a>
+            </div>
+            <div th:class="${searchDataVo.orderByItem eq 2}? 'on col-xs-1 col-sm-1 col-md-1 col-lg-1' : 'col-xs-1 col-sm-1 col-md-1 col-lg-1'">
+                <a href="javascript:void(0)" onclick="orderBy(2)">点击量</a>
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <!-- 上部面板 -->
+    <div class="channel row">
+
+        <span th:if="${#lists.isEmpty(pageInfo.list)}">
+            <p class="text-center">该关键字没有任何书籍！</p>
+        </span>
+
+        <!-- 搜索条件隐藏域 -->
+        <input id="searchItem" type="hidden" name="bookName" th:value="${bookItem}">
+        <!-- 小说数据面板 -->
+        <th:block th:each="book,bookStat:${pageInfo.list}">
+
+
+            <div th:if="${bookStat.even}" th:class="row">
+
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+                    <div class=" col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <a class="bookImg" th:href="@{/front/novel(id=${book.id})}">
+                            <img th:src="${book.picUrl}" alt="小说封面">
+                        </a>
+
+                    </div>
+
+                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+
+                        <div class="bookTitle row">
+                            <a th:href="@{/front/novel(id=${book.id})}" th:text="${book.bookName}">超神级异兽培育系统</a>
+                        </div>
+
+                        <div class="bookLink row">
+                            <span th:text="${book.authorName}">小白作家</span> |
+                            <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                            <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                            <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                            <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
+                            <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                        </div>
+
+
+                        <div class="bookIntro row" th:utext="${book.bookIntro}">
+                            <p>你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！</p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <hr th:if="${bookStat.even}"/>
+
+            <th:block th:if="${bookStat.odd}">
+
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+                    <div class=" col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <a class="bookImg" th:href="@{/front/novel(id=${book.id})}">
+                            <img th:src="${book.picUrl}" alt="小说封面">
+                        </a>
+
+                    </div>
+
+                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+
+                        <div class="bookTitle row">
+                            <a th:href="@{/front/novel(id=${book.id})}" th:text="${book.bookName}">超神级异兽培育系统</a>
+                        </div>
+
+                        <div class="bookLink row">
+                            <span th:text="${book.authorName}">小白作家</span> |
+                            <!--<a href="" th:text="${book.authorName}">小白作家</a> |-->
+                            <a th:href="@{/front/index/allWork(bookCategory=${book.bookCategory})}" th:text="${@dict.getLabel('book_category', book.bookCategory)}">科幻灵异</a> |
+                            <a th:href="@{/front/index/allWork(bookStatus=${book.bookStatus})}" th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</a> |
+                            <!--<span th:text="${@dict.getLabel('book_book_status', book.bookStatus)}">连载中</span> |-->
+                            <span th:text="${#dates.format(book.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                        </div>
+
+
+                        <div class="bookIntro row" th:utext="${book.bookIntro}">
+                            <p>你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！你好哇，这是一段介绍！</p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </th:block>
+
+
+        </th:block>
+
+    </div>
+
+    <!--分页栏-->
+    <nav aria-label="Page navigation" class="text-right">
+        <ul class="pagination">
+            <li th:class="${pageInfo.isFirstPage}? 'disabled'"><a th:href="@{/front/index/toNovelResultPlus(bookName=${bookItem},pageNum=1,pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">首页</a></li>
+            <li th:class="${pageInfo.isFirstPage}? 'disabled'">
+                <a th:if="${pageInfo.hasPreviousPage}" th:href="@{/front/index/toNovelResultPlus(bookName=${bookItem},pageNum=${pageInfo.prePage},pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">
+                    上一页
+                </a>
+            </li>
+            <!-- 超出部分显示省略号 -->
+            <li th:if="${pageInfo.navigateFirstPage &gt; 1}"><span>&hellip;</span></li>
+            <!-- 导航页码 -->
+            <th:block th:each="num : ${pageInfo.navigatepageNums}">
+                <li th:class="${pageInfo.pageNum == num} ? 'active'">
+                    <a th:href="@{/front/index/toNovelResultPlus(pageNum=${num},pageSize=10,bookName=${bookItem},bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}" th:text="${num}">1</a>
+                </li>
+            </th:block>
+            <!-- 超出部分显示省略号 -->
+            <li th:if="${pageInfo.navigateLastPage &lt; pageInfo.pages}"><span>&hellip;</span></li>
+            <li th:class="${pageInfo.isLastPage}? 'disabled'">
+                <a th:if="${pageInfo.hasNextPage}" th:href="@{/front/index/toNovelResultPlus(bookName=${bookItem},pageNum=${pageInfo.nextPage},pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">
+                    下一页
+                </a>
+            </li>
+            <li th:class="${pageInfo.isLastPage}? 'disabled'"><a th:href="@{/front/index/toNovelResultPlus(pageNum=${pageInfo.pages},pageSize=10,bookName=${bookItem},bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">末页</a></li>
+        </ul>
+    </nav>
+
+</div>
+
+<!-- 尾部标签页 -->
+<hr>
+<div class="footer container">
+    <p class="text-center">基于SpringBoot的网文阅读网的设计与实现 | create by @zqw | 联系方式：goodzhang888@163.com</p>
+</div>
+
+<th:block th:include="include :: footer" />
+
+<script th:inline="javascript">
+
+    var prefix = ctx + "front/index";
+    //搜索条件
+    var bookName = $("#searchItem").val();
+    console.log("搜索条件为：" + bookName);
+
+    //获取历史查询条件对象
+    var searchDataVo =  JSON.parse($('#searchDataVo').val());
+    console.log("历史查询条件为：" +searchDataVo);
+    console.log("种类："+searchDataVo.bookCategory);
+    console.log("状态："+searchDataVo.bookStatus);
+    console.log("排序条件："+searchDataVo.orderByItem);
+    console.log("字数："+searchDataVo.bookWord);
+    console.log("时间："+searchDataVo.timeItem);
+
+
+    //构造查询条件对象
+    var bookItem = {
+        bookCategory: '',
+        bookStatus: '',      //null无法被Integer类型识别
+        orderByItem: '',
+        bookWord: '',
+        timeItem: ''
+    };
+
+    //格式转化
+    //种类
+    if (searchDataVo.bookCategory === undefined){
+        bookItem.bookCategory = '';
+    }else {
+        bookItem.bookCategory = searchDataVo.bookCategory;
+    }
+    //状态
+    if(searchDataVo.bookStatus === undefined){
+        bookItem.bookStatus = '';
+    }else {
+        bookItem.bookStatus = searchDataVo.bookStatus;
+    }
+    //排序类型
+    if (searchDataVo.orderByItem === undefined){
+        bookItem.orderByItem = '';
+    }else {
+        bookItem.orderByItem = searchDataVo.orderByItem;
+    }
+    //字数
+    if (searchDataVo.bookWord === undefined){
+        bookItem.bookWord = '';
+    }else {
+        bookItem.bookWord = searchDataVo.bookWord;
+    }
+    //时间
+    if (searchDataVo.timeItem === undefined){
+        bookItem.timeItem = '';
+    }else {
+        bookItem.timeItem = searchDataVo.timeItem;
+    }
+
+    console.log("本次查询对象（暂时）为："+bookItem);
+    console.log(bookItem);
+    console.log(bookItem.bookCategory);
+    console.log(bookItem.bookStatus);
+    console.log(bookItem.orderByItem);
+    console.log(bookItem.bookWord);
+    console.log(bookItem.timeItem);
+
+
+    /**
+     * 点击事件
+     * @param type
+     */
+    //作品分类
+    function category(type) {
+
+        bookItem.bookCategory = type;
+        console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+        console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+        console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+        console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+        console.log("本次查询的时间条件为：" + bookItem.timeItem);
+        location.href = prefix + "/toNovelResultPlus?bookName="+bookName+"&bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+
+    }
+
+    //完结状态
+    function bookStatusItem(type) {
+        bookItem.bookStatus = type;
+        console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+        console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+        console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+        console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+        console.log("本次查询的时间条件为：" + bookItem.timeItem);
+        location.href = prefix + "/toNovelResultPlus?bookName="+bookName+"&bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+    }
+
+    //作品字数
+    function bookword(type) {
+        bookItem.bookWord = type;
+        console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+        console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+        console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+        console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+        console.log("本次查询的时间条件为：" + bookItem.timeItem);
+        location.href = prefix + "/toNovelResultPlus?bookName="+bookName+"&bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+    }
+
+    //排序条件
+    function orderBy(item) {
+        bookItem.orderByItem = item;
+        console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+        console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+        console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+        console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+        console.log("本次查询的时间条件为：" + bookItem.timeItem);
+        location.href = prefix + "/toNovelResultPlus?bookName="+bookName+"&bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+    }
+
+    //更新时间
+    function changeTime(type) {
+        bookItem.timeItem = type;
+        console.log("本次查询的书籍状态条件为：" + bookItem.bookStatus);
+        console.log("本次查询的书籍种类条件为：" + bookItem.bookCategory);
+        console.log("本次查询的排序条件为：" + bookItem.orderByItem);
+        console.log("本次查询的作品字数条件为：" + bookItem.bookWord);
+        console.log("本次查询的时间条件为：" + bookItem.timeItem);
+        location.href = prefix + "/toNovelResultPlus?bookName="+bookName+"&bookCategory=" + bookItem.bookCategory + "&bookStatus=" + bookItem.bookStatus + "&orderByItem=" + bookItem.orderByItem + "&bookWord=" + bookItem.bookWord + "&timeItem=" + bookItem.timeItem;
+    }
+</script>
+</body>
+</html>

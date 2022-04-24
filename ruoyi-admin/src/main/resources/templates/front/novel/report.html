@@ -129,16 +129,28 @@
 
     var prefix = ctx + "front/novel";
 
+
     function submitCom() {
-        $.modal.confirm("确定要提交举报吗？",function () {
-            $.operate.post(prefix + "/addReport",{
-                bookId: $('#bookId').val(),
-                bookName: $('#bookName').val(),
-                authorName: $('#authorName').val(),
-                reportType: $('#sel').val(),
-                note: $('#note').val()
+
+        var reportType = $('#sel').val();
+        var note = $('#note').val();
+
+        if (reportType == '' || note == ''){
+            alert("请保证举报类型或备注不为空！");
+        }else {
+            $.modal.confirm("确定要提交举报吗？",function () {
+                $.operate.post(prefix + "/addReport",{
+                    bookId: $('#bookId').val(),
+                    bookName: $('#bookName').val(),
+                    authorName: $('#authorName').val(),
+                    reportType: $('#sel').val(),
+                    note: $('#note').val()
+                });
             });
-        });
+        }
+
+
+
     }
 
 </script>

@@ -53,7 +53,6 @@ public class bookChapterController extends BaseController {
     @ResponseBody
     public TableDataInfo list(BookChapter bookChapter){
 
-        //System.out.println("测试！");
 
         startPage();
         // 查询小说作品的所有章节信息
@@ -124,7 +123,7 @@ public class bookChapterController extends BaseController {
     //@RequiresPermissions("system:post:add")
     @PostMapping("/addContent")
     @ResponseBody
-    public AjaxResult addContent(ChapterContent chapterContent){
+    public AjaxResult addContent(@Validated ChapterContent chapterContent){
 
         //章节内容是否包含敏感词
         boolean isSenWords = SensitiveWordHelper.contains(chapterContent.getChapterContent());

@@ -10,4 +10,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface BookCheckService extends IService<BookCheck> {
 
+    /**
+     * 根据ID查询记录
+     * @param bookCheck
+     * @return
+     */
+    BookCheck selectOptionById(BookCheck bookCheck);
 }

@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * 
  * @TableName chapter_content
@@ -27,6 +29,7 @@ public class ChapterContent implements Serializable {
     /**
      * 小说章节内容
      */
+    @NotBlank(message = "章节内容不能为空！")
     private String chapterContent;
 
     @TableField(exist = false)

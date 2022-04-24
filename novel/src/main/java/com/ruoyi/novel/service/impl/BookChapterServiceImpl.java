@@ -170,14 +170,24 @@ public class BookChapterServiceImpl extends ServiceImpl<BookChapterMapper, BookC
         QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("book_id",id);
         List<BookChapter> bookChapterList = bookChapterMapper.selectList(queryWrapper);
-        if (StringUtils.isNull(bookChapterList)){
-            throw new ServiceException("当前小说目录信息为空！");
-        }
         return bookChapterList;
 
     }
 
+    /**
+     * 查询已审核过的小说章节目录
+     * @param book
+     * @return
+     */
+    public List<BookChapter> selectBookChapters(Book book) {
 
+        QueryWrapper<BookChapter> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("book_id",book.getId())
+                .eq("check_status",1);
+        List<BookChapter> bookChapterList = bookChapterMapper.selectList(queryWrapper);
+
+        return bookChapterList;
+    }
 }
 
 

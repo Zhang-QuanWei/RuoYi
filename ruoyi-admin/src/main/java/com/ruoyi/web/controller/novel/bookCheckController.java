@@ -5,6 +5,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.ShiroUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.novel.domain.Book;
 import com.ruoyi.novel.domain.BookCheck;
 import com.ruoyi.novel.service.impl.BookCheckServiceImpl;
@@ -97,16 +98,28 @@ public class bookCheckController extends BaseController {
         SysUser sysUser = ShiroUtils.getSysUser();
         bookCheck.setEditorId(sysUser.getUserId());
         bookCheck.setEditorName(sysUser.getUserName());
+        Boolean result = false;
 
         //修改审核状态为不通过
         //1. 根据小说ID搜索到此小说
         Book book = bookService.selectBookByBookId(bookCheck.getBookId());
-        book.setBookStatus(2);
+        book.setCheckStatus(2);
         //2. 修改该小说的审核状态
         boolean checkResult = bookService.updateById(book);
 
-        //更新小说审核记录
-        boolean result = bookCheckService.save(bookCheck);
+        //增添或更新审核记录
+        //3. 根据bookID查询是否已经拥有审核记录
+        BookCheck info = bookCheckService.selectOptionById(bookCheck);
+
+        if (StringUtils.isNotNull(info)){
+            //更新审核记录
+            info.setCheckOpinion(bookCheck.getCheckOpinion());
+            result = bookCheckService.updateById(info);
+        }else {
+            //插入审核记录
+            result = bookCheckService.save(bookCheck);
+        }
+
 
         if (checkResult && result){
             return AjaxResult.success("提交信息成功！");

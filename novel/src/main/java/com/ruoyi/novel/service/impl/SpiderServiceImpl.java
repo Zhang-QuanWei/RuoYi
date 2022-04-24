@@ -88,7 +88,9 @@ public class SpiderServiceImpl implements SpiderService {
         for (String bookUrl : bookUrls){
             boolean result = insertOneBook(bookUrl);
             if (!result){
-                throw new ServiceException("小说入库失败！");
+                // throw new ServiceException("小说入库失败！");
+                System.out.println("小说:"+bookUrl+"入库失败！");
+                continue;
             }
         }
 
@@ -191,8 +193,10 @@ public class SpiderServiceImpl implements SpiderService {
             book.setBookCategory("4");
         } else if (StringUtils.equals(bookCategory,"侦探推理")){
             book.setBookCategory("5");
-        } else if (StringUtils.equals(bookCategory,"网友动漫")){
+        } else if (StringUtils.equals(bookCategory,"网游动漫")){
             book.setBookCategory("6");
+        } else if (StringUtils.equals(bookCategory,"其他类型")){
+            book.setBookCategory("7");
         }
         //小说状态
         String bookStatus = JsoupUtils.subStrStart(info_detail.select("span").get(2).text());

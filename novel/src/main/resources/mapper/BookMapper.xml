@@ -51,6 +51,9 @@
             <if test="checkStatus != null">
                 AND check_status = #{checkStatus}
             </if>
+            <if test="bookStatus != null">
+                AND book_status = #{bookStatus}
+            </if>
             <if test="authorId != null">
                 AND author_id = #{authorId}
             </if>

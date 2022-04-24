@@ -35,7 +35,7 @@ public class FeedBackController extends BaseController {
     public TableDataInfo list(Feedback feedback)
     {
         //查询未受理的举报信息
-        feedback.setResolutionStatus(0);
+        // feedback.setResolutionStatus(0);
 
         startPage();
         List<Feedback> list = feedbackService.selectFeedBackList(feedback);

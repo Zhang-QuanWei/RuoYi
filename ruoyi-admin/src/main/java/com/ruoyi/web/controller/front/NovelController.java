@@ -70,10 +70,9 @@ public class NovelController extends BaseController {
         List<Book> bookList = bookService.selectBookListByBookCategory(result.getBookCategory());
         modelMap.put("bookList",bookList);
 
-        // 增加点击量
-        // Long newVisit = book.getVisitCount() + (long) 1;
-        //点击数+1
-        // book.setVisitCount(newVisit);
+        // 点击量+1
+        result.setVisitCount(result.getVisitCount()+1L);
+        boolean res = bookService.updateById(result);
 
         //查询评论集合
         List<BookComment> bookCommentList = bookCommentService.selectCommentListByBookId(book.getId());
@@ -152,8 +151,9 @@ public class NovelController extends BaseController {
 
         //查询小说信息
         Book result = bookService.selectBookByBookId(book.getId());
-        //查询小说全部章节
-        List<BookChapter> bookChapters = bookChapterService.selectBookChapterByBookId(book.getId());
+        //查询小说全部已审核完毕的章节
+        List<BookChapter> bookChapters = bookChapterService.selectBookChapters(book);
+        // List<BookChapter> bookChapters = bookChapterService.selectBookChapterByBookId(book.getId());
 
         SysUser user = ShiroUtils.getSysUser();
         if (StringUtils.isNotNull(user)){
@@ -202,13 +202,18 @@ public class NovelController extends BaseController {
     @ResponseBody
     public AjaxResult addBookShelf(BookShelf bookShelf){
 
+        //添加订阅数
+        Book book = bookService.selectBookByBookId(bookShelf.getBookId());
+        book.setSubsNum(book.getSubsNum() + 1);
+        boolean rows = bookService.updateById(book);
+
         boolean result = bookShelfService.save(bookShelf);
 
-        if (result){
+        if (result && rows){
             return AjaxResult.success("添加成功！");
         }
 
-        return AjaxResult.error("添加失败！");
+        return AjaxResult.error("添加失败！请联系管理员");
     }
 
     /**

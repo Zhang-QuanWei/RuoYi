@@ -10,7 +10,10 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.novel.domain.Book;
+import com.ruoyi.novel.domain.BookCheck;
+import com.ruoyi.novel.service.BookCheckService;
 import com.ruoyi.novel.service.impl.BookChapterServiceImpl;
+import com.ruoyi.novel.service.impl.BookCheckServiceImpl;
 import com.ruoyi.novel.service.impl.BookServiceImpl;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.stereotype.Controller;
@@ -28,6 +31,9 @@ public class BookController extends BaseController {
 
     @Resource
     private BookServiceImpl bookService;
+
+    @Resource
+    private BookCheckService bookCheckService;
 
     @Resource
     private BookChapterServiceImpl bookChapterService;
@@ -190,6 +196,17 @@ public class BookController extends BaseController {
         }
 
         return AjaxResult.error("修改书籍信息失败！");
+    }
+
+    @PostMapping("/viewCheckOpinion")
+    @ResponseBody
+    public AjaxResult viewCheckOpinion(BookCheck bookCheck){
+        //bookcheck只带有bookID
+        BookCheck result = bookCheckService.selectOptionById(bookCheck);
+
+        return AjaxResult.success(result);
+
+
     }
 
 

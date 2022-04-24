@@ -8,6 +8,35 @@
 
     <div class="row">
 
+        <div class="col-sm-12 search-collapse">
+            <form id="post-form">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            小说名称：<input type="text" name="bookName"/>
+                        </li>
+                        <li>
+                            举报类型：<select name="reportType" th:with="type=${@dict.getType('report_type')}">
+                            <option value="">所有</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+                        <li>
+                            受理状态：<select name="solveStatus" th:with="type=${@dict.getType('solve_status')}">
+                            <option value="">所有</option>
+                            <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                        </select>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+
         <div class="col-sm-12 select-table table-striped">
             <table id="bootstrap-table"></table>
         </div>
@@ -20,6 +49,7 @@
     <th:block th:include="include :: footer" />
     <script th:inline="javascript">
         var datas = [[${@dict.getType('report_type')}]];
+        var statusDatas = [[${@dict.getType('solve_status')}]];
         var prefix = ctx + "novel/report";
 
         function solve(id) {
@@ -61,6 +91,14 @@
                         }
                     },
                     {
+                        field: 'solveStatus',
+                        title: '受理状态',
+                        align: 'center',
+                        formatter: function(value, row, index) {
+                            return $.table.selectDictLabel(statusDatas, value);
+                        }
+                    },
+                    {
                         field: 'bookName',
                         title: '小说名称'
                     },
@@ -81,7 +119,7 @@
                         align: 'center',
                         formatter: function(value, row, index) {
                             var actions = [];
-                            actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="solve(\'' + row.id + '\')"><i class="fa fa-edit"></i>已受理</a> ');
+                            actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="solve(\'' + row.id + '\')"><i class="fa fa-edit"></i>受理</a> ');
                             return actions.join('');
                         }
                     }]

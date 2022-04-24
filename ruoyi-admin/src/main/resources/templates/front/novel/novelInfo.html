@@ -167,13 +167,14 @@
 
         <!-- 小说信息 -->
         <div class="book-info col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
             <!-- 小说名与作者 -->
             <div class="book-name row">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                     <h3>
                         <strong th:text="${book.bookName}">小说名字</strong>
                     </h3>
-                    <span><a href="#" th:text="${book.authorName}">逍遥子</a> 著</span>
+                    <span><a th:text="${book.authorName}">逍遥子</a> 著</span>
                 </div>
 
             </div>
@@ -223,7 +224,7 @@
                 </div>
 
                 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                    <a class="btn btn-warning" th:href="@{/front/novel/toReport(id=${book.id})}" role="button">举报该作品</a>
+                    <a class="btn btn-warning" th:href="@{/front/novel/toReport(id=${book.id})}" role="button">举报作品</a>
                 </div>
 
                 <shiro:hasRole name="inspector">
@@ -234,6 +235,7 @@
 
 
             </div>
+
         </div>
 
         <!-- 作者信息 -->
@@ -314,7 +316,6 @@
             </div>
 
             <!-- 发表评论 -->
-            <!-- TODO 举报作品功能 -->
             <span style="display:inline-block;">我的评价分数：</span>
             <input type="text" class="comment-star rating rating-loading" value="5" data-size="md" data-theme="krajee-gly" title="" >
             <!-- 编辑器 -->
@@ -504,7 +505,7 @@
                     userName: userName,
                     score: score,
                     parentId:parentId,
-                    commentContent: editor.txt.text()
+                    commentContent: editor.txt.html()
 
                 },function (result) {
 
@@ -532,7 +533,7 @@
             if (userId == 'noItem' || userName == 'noItem'){
                 //未登录
                 //跳转登录页面
-                $.get(ctx + "front/index/login");
+                location.href = ctx + "front/index/login";
             }else {
                 //提交加入书架请求
                 $.post(prefix + "/addBookShelf",{

@@ -102,13 +102,13 @@
                     <span class="fa fa-book fa-fw"></span>
                     <a th:href="@{/front/index/toBookShelf}">我的书架</a>
                 </li>
-                <li>
-                    <span class="fa fa-commenting fa-fw"></span>
-                    <a href="">我的书评</a>
-                </li>
+                <!--<li>-->
+                <!--    <span class="fa fa-commenting fa-fw"></span>-->
+                <!--    <a href="">我的书评</a>-->
+                <!--</li>-->
                 <li>
                     <span class="fa fa-gear fa-fw"></span>
-                    <a href="">我的反馈</a>
+                    <a th:href="@{/front/index/toFeedBack}">我的反馈</a>
                 </li>
             </ul>
         </div>
@@ -168,7 +168,7 @@
     // 提交反馈内容
     function submitCom() {
         if (!editor.txt.text()){
-            alert("评论区不可为空！");
+            alert("内容区不可为空！");
             location.reload();
         }else {
             $.modal.confirm("确定要提交吗？",function () {

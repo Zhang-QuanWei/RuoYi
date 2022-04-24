@@ -1,10 +1,13 @@
 package com.ruoyi.novel.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.novel.domain.BookCheck;
 import com.ruoyi.novel.service.BookCheckService;
 import com.ruoyi.novel.mapper.BookCheckMapper;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
 * @author 64829
@@ -15,6 +18,23 @@ import org.springframework.stereotype.Service;
 public class BookCheckServiceImpl extends ServiceImpl<BookCheckMapper, BookCheck>
     implements BookCheckService{
 
+    @Resource
+    private BookCheckMapper bookCheckMapper;
+
+    /**
+     * 根据ID查询
+     * @param bookCheck
+     * @return
+     */
+    @Override
+    public BookCheck selectOptionById(BookCheck bookCheck) {
+
+        QueryWrapper<BookCheck> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("book_id",bookCheck.getBookId());
+        BookCheck result = bookCheckMapper.selectOne(queryWrapper);
+
+        return result;
+    }
 }
 
 

@@ -388,9 +388,9 @@
         <!--分页栏-->
         <nav aria-label="Page navigation" class="text-right">
             <ul class="pagination">
-                <li th:class="${pageInfo.isFirstPage}? 'disabled'"><a th:href="@{/front/index/list/{id}(pageNum=1,pageSize=10)}">首页</a></li>
+                <li th:class="${pageInfo.isFirstPage}? 'disabled'"><a th:href="@{/front/allWork/list(pageNum=1,pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">首页</a></li>
                 <li th:class="${pageInfo.isFirstPage}? 'disabled'">
-                    <a th:if="${pageInfo.hasPreviousPage}" th:href="@{/front/index/list/{id}(pageNum=${pageInfo.prePage},pageSize=10)}">
+                    <a th:if="${pageInfo.hasPreviousPage}" th:href="@{/front/allWork/list(pageNum=${pageInfo.prePage},pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">
                         上一页
                     </a>
                 </li>
@@ -399,17 +399,17 @@
                 <!-- 导航页码 -->
                 <th:block th:each="num : ${pageInfo.navigatepageNums}">
                     <li th:class="${pageInfo.pageNum == num} ? 'active'">
-                        <a th:href="@{/front/index/list/{id}(pageNum=${num},pageSize=10)}" th:text="${num}">1</a>
+                        <a th:href="@{/front/allWork/list(pageNum=${num},pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}" th:text="${num}">1</a>
                     </li>
                 </th:block>
                 <!-- 超出部分显示省略号 -->
                 <li th:if="${pageInfo.navigateLastPage &lt; pageInfo.pages}"><span>&hellip;</span></li>
                 <li th:class="${pageInfo.isLastPage}? 'disabled'">
-                    <a th:if="${pageInfo.hasNextPage}" th:href="@{/front/index/list/{id}(pageNum=${pageInfo.nextPage},pageSize=10)}">
+                    <a th:if="${pageInfo.hasNextPage}" th:href="@{/front/allWork/list(pageNum=${pageInfo.nextPage},pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">
                         下一页
                     </a>
                 </li>
-                <li th:class="${pageInfo.isLastPage}? 'disabled'"><a th:href="@{/front/index/list/{id}(pageNum=${pageInfo.pages},pageSize=10)}">末页</a></li>
+                <li th:class="${pageInfo.isLastPage}? 'disabled'"><a th:href="@{/front/allWork/list(pageNum=${pageInfo.pages},pageSize=10,bookCategory=${searchDataVo.bookCategory},bookStatus=${searchDataVo.bookStatus},orderByItem=${searchDataVo.orderByItem},bookWord=${searchDataVo.bookWord},timeItem=${searchDataVo.timeItem})}">末页</a></li>
             </ul>
         </nav>
     </div>

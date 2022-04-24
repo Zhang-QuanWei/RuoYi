@@ -38,7 +38,6 @@ public class UserInfoController extends BaseController {
     @ResponseBody
     public AjaxResult update(SysUser user)
     {
-        System.out.println(user.toString());
         SysUser currentUser = getSysUser();
         currentUser.setUserName(user.getUserName());
         currentUser.setEmail(user.getEmail());

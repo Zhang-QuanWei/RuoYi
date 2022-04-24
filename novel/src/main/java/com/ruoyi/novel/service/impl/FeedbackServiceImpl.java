@@ -2,6 +2,7 @@ package com.ruoyi.novel.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.novel.domain.Feedback;
 import com.ruoyi.novel.service.FeedbackService;
 import com.ruoyi.novel.mapper.FeedbackMapper;
@@ -30,7 +31,8 @@ public class FeedbackServiceImpl extends ServiceImpl<FeedbackMapper, Feedback>
     @Override
     public List<Feedback> selectFeedBackList(Feedback feedback) {
 
-        QueryWrapper<Feedback> queryWrapper = new QueryWrapper<>(feedback);
+        QueryWrapper<Feedback> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(StringUtils.isNotNull(feedback.getResolutionStatus()),"resolution_status",feedback.getResolutionStatus());
         List<Feedback> feedbackList = feedbackMapper.selectList(queryWrapper);
 
         return feedbackList;

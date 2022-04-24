@@ -38,7 +38,7 @@ public class ReportController extends BaseController {
     public TableDataInfo list(Report report)
     {
         //查询未受理的举报信息
-        report.setSolveStatus(0);
+        // report.setSolveStatus(0);
 
 
         startPage();

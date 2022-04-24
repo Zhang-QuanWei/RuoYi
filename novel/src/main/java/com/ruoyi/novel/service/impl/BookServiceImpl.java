@@ -194,8 +194,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
      * @return
      */
     public List<Book> selectCheckBook(Book book) {
-        //TODO 查询方式待更正，需要保证章节审核完毕后页面才不显示该小说，否则即使小说审核完毕，章节未审核完毕的话，页面依旧显示该小说
-        book.setCheckStatus(0);
+        //查询连载中的小说（无论审核与否：已审核的需要审核后续章节，未审核的需要进行审核）
+        book.setBookStatus(0);
 
         List<Book> bookList = bookMapper.selectBookList(book);
 
@@ -258,8 +258,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
         //0:点击榜、1:订阅榜、2:更新榜
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("check_status",1)
-                .orderByAsc(queryItem == 0,"visit_count")
-                .orderByAsc(queryItem == 1,"subs_num")
+                .orderByDesc(queryItem == 0,"visit_count")
+                .orderByDesc(queryItem == 1,"subs_num")
                 .orderByDesc(queryItem == 2,"update_time");
 
         PageHelper.startPage(pageNum,pageSize);
@@ -349,6 +349,90 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book>
 
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("check_status",1)
+                .eq(StringUtils.isNotNull(searchDataVo.getBookCategory()),"book_category",String.valueOf(searchDataVo.getBookCategory()))
+                .eq(StringUtils.isNotNull(searchDataVo.getBookStatus()),"book_status",searchDataVo.getBookStatus())
+                .between(StringUtils.isNotNull(searchDataVo.getBookWord()),"book_word",startWord,endWord);
+
+        // 更新时间
+        if (StringUtils.isNotNull(searchDataVo.getTimeItem())){
+            if (searchDataVo.getTimeItem() == 0){
+                //三日内
+                queryWrapper.apply("DATE_SUB(CURDATE(), INTERVAL 2 DAY) <= date(update_time)");
+            }
+            if (searchDataVo.getTimeItem() == 1){
+                //七日内
+                queryWrapper.apply("DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(update_time)");
+            }
+            if (searchDataVo.getTimeItem() == 2){
+                //半月内
+                queryWrapper.apply("DATE_SUB(CURDATE(), INTERVAL 14 DAY) <= date(update_time)");
+            }
+            if (searchDataVo.getTimeItem() == 3){
+                //一月内
+                queryWrapper.apply("DATE_FORMAT( update_time, '%Y%m' ) = DATE_FORMAT( CURDATE( ) , '%Y%m' )");
+            }
+        }
+
+        // 排序条件
+        if (StringUtils.isNotNull(searchDataVo.getOrderByItem())){
+            if (searchDataVo.getOrderByItem() == 0){
+                queryWrapper.orderByDesc("update_time");
+            }
+            if (searchDataVo.getOrderByItem() == 1){
+                queryWrapper.orderByDesc("book_word");
+            }
+            if (searchDataVo.getOrderByItem() == 2){
+                queryWrapper.orderByDesc("visit_count");
+            }
+        }
+
+        PageHelper.startPage(pageNum,pageSize);
+        List<Book> bookList = bookMapper.selectList(queryWrapper);
+        PageInfo<Book> pageInfo = new PageInfo<>(bookList);
+
+        return pageInfo;
+    }
+
+    /**
+     * 表头查询结果按条件显示
+     * @param pageNum
+     * @param pageSize
+     * @param searchDataVo
+     * @param bookName
+     * @return
+     */
+    @Override
+    public PageInfo<Book> getBookListBySearchItem(Integer pageNum, Integer pageSize, SearchDataVo searchDataVo, String bookName) {
+
+        // 字数条件
+        int startWord = 0;
+        int endWord = 0;
+        if (StringUtils.isNotNull(searchDataVo.getBookWord())){
+            if (searchDataVo.getBookWord() == 0){
+                //0-30万字
+                startWord = 0;
+                endWord = 300000;
+            }
+            if (searchDataVo.getBookWord() == 1){
+                //30-50万字
+                startWord = 300000;
+                endWord = 500000;
+            }
+            if (searchDataVo.getBookWord() == 2){
+                //50-100万字
+                startWord = 500000;
+                endWord = 1000000;
+            }
+            if (searchDataVo.getBookWord() == 3){
+                //100万字以上
+                startWord = 1000000;
+                endWord = 100000000;
+            }
+        }
+
+        QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("book_name",bookName)
+                .eq("check_status",1)
                 .eq(StringUtils.isNotNull(searchDataVo.getBookCategory()),"book_category",String.valueOf(searchDataVo.getBookCategory()))
                 .eq(StringUtils.isNotNull(searchDataVo.getBookStatus()),"book_status",searchDataVo.getBookStatus())
                 .between(StringUtils.isNotNull(searchDataVo.getBookWord()),"book_word",startWord,endWord);

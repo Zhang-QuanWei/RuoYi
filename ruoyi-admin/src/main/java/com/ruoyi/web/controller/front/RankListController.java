@@ -37,6 +37,9 @@ public class RankListController extends BaseController {
     @GetMapping("/list/{id}")
     public String list(Integer queryItem, Integer pageNum, Integer pageSize, ModelMap modelMap){
 
+        SysUser user = ShiroUtils.getSysUser();
+        modelMap.put("user",user);
+
         //根据条件查询排序后的书籍
         PageInfo<Book> pageInfo = bookService.selectBookListOrderByItem(queryItem,pageNum,pageSize);
 

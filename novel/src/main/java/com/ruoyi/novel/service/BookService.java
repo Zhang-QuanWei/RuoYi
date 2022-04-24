@@ -1,7 +1,9 @@
 package com.ruoyi.novel.service;
 
+import com.github.pagehelper.PageInfo;
 import com.ruoyi.novel.domain.Book;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ruoyi.novel.vo.SearchDataVo;
 
 import java.util.List;
 
@@ -18,4 +20,14 @@ public interface BookService extends IService<Book> {
      * @return
      */
     List<Book> selectNewList(Book book);
+
+    /**
+     * 表头查询结果按条件显示
+     * @param pageNum
+     * @param pageSize
+     * @param searchDataVo
+     * @param bookName
+     * @return
+     */
+    PageInfo<Book> getBookListBySearchItem(Integer pageNum, Integer pageSize, SearchDataVo searchDataVo, String bookName);
 }

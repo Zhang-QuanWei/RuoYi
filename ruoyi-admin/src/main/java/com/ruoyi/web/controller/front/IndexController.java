@@ -119,10 +119,13 @@ public class IndexController extends BaseController {
     @RequestMapping(value = "/list/{id}",method = RequestMethod.GET)
     public String list(Integer pageNum,Integer pageSize,ModelMap modelMap){
 
+        Book book = new Book();
+        book.setCheckStatus(1);
+
         //查询5本点击量最高的书籍
         List<Book> bookList = bookService.selectNewList(null);
         //查询书籍列表
-        PageInfo<Book> pageInfo = bookService.getBookList(pageNum, pageSize,null);
+        PageInfo<Book> pageInfo = bookService.getBookList(pageNum, pageSize, book);
         //查询3条公告
         List<SysNotice> noticeList = noticeService.selectNewList(null);
 
@@ -306,7 +309,10 @@ public class IndexController extends BaseController {
      */
     @PostMapping("/toNovelResult")
     public String toNovelResult(Book book,ModelMap modelMap){
+        SysUser user = ShiroUtils.getSysUser();
+        modelMap.put("user",user);
 
+        //设置审核通过条件
         book.setCheckStatus(1);
 
         Integer pageNum = 1;
@@ -316,7 +322,39 @@ public class IndexController extends BaseController {
 
         modelMap.put("pageInfo",pageInfo);
 
+
         return prefix + "/novelResult";
+    }
+
+    /**
+     * 跳转表头查询结果页面
+     * @param bookName
+     * @param searchDataVo
+     * @param pageNum
+     * @param pageSize
+     * @param modelMap
+     * @return
+     */
+    @GetMapping("/toNovelResultPlus")
+    public String toNovelResultPlus(String bookName,SearchDataVo searchDataVo,Integer pageNum,Integer pageSize,ModelMap modelMap){
+
+
+
+        SysUser user = ShiroUtils.getSysUser();
+        modelMap.put("user",user);
+
+        if (StringUtils.isNull(pageNum) && StringUtils.isNull(pageSize)){
+            pageNum = 1;
+            pageSize = 10;
+        }
+
+        PageInfo<Book> pageInfo = bookService.getBookListBySearchItem(pageNum,pageSize,searchDataVo,bookName);
+
+        modelMap.put("pageInfo",pageInfo);
+        modelMap.put("searchDataVo", JSONObject.toJSON(searchDataVo));
+        modelMap.put("bookItem",bookName);
+
+        return prefix + "/searchResult";
     }
 
     /**
